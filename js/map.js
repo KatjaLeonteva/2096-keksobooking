@@ -107,7 +107,7 @@ function generateRandomNotice(options) {
       'guests': getRandomInt(options.guestsMin, options.guestsMax),
       'checkin': getRandomElement(options.offerCheckIn),
       'checkout': getRandomElement(options.offerCheckOut),
-      'features': options.offerFeatures,
+      'features': options.offerFeatures.slice(0, getRandomInt(0, options.offerFeatures.length)), // Получаем массив удобств случайной длины, порядок сохраняется
       'description': '',
       'photos': shuffleArray(options.offerPhotos)
     },
@@ -118,7 +118,6 @@ function generateRandomNotice(options) {
     }
   };
 
-  console.log(notice);
   return notice;
 }
 
@@ -127,12 +126,15 @@ function generateRandomNotice(options) {
  *
  * @param {array} pinsData Массив с данными для меток.
  * @param {Node} pinsElement Элемент, куда вставляются метки.
+ * @param {Node} pinTemplate Шаблон метки.
+ * @param {number} pinWidth Ширина метки.
+ * @param {number} pinHeight Высота метки.
  */
-function renderPins(pinsData, pinsElement) {
+function renderPins(pinsData, pinsElement, pinTemplate, pinWidth, pinHeight) {
   var fragment = document.createDocumentFragment();
 
   for (var i = 0; i < pinsData.length; i++) {
-    fragment.appendChild(renderPin(pinsData[i], PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT));
+    fragment.appendChild(renderPin(pinsData[i], pinTemplate, pinWidth, pinHeight));
   }
 
   pinsElement.appendChild(fragment);
@@ -142,16 +144,16 @@ function renderPins(pinsData, pinsElement) {
  * Создает метку по шаблону
  *
  * @param {object} pinData Данные для метки.
- * @param {Node} pinTemplate Шаблон метки.
- * @param {number} pinWidth Ширина метки.
- * @param {number} pinHeight Высота метки.
+ * @param {Node} template Шаблон метки.
+ * @param {number} width Ширина метки.
+ * @param {number} height Высота метки.
  * @return {Node} pinElement DOM элемент.
  */
-function renderPin(pinData, pinTemplate, pinWidth, pinHeight) {
-  var pinElement = pinTemplate.cloneNode(true);
+function renderPin(pinData, template, width, height) {
+  var pinElement = template.cloneNode(true);
 
-  pinElement.style.left = (pinData.location.x - pinWidth / 2) + 'px';
-  pinElement.style.top = (pinData.location.y - pinHeight) + 'px';
+  pinElement.style.left = (pinData.location.x - width / 2) + 'px';
+  pinElement.style.top = (pinData.location.y - height) + 'px';
 
   pinElement.querySelector('img').setAttribute('src', pinData.author.avatar);
 
@@ -192,19 +194,70 @@ function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement
   cardCheckinCheckout.textContent = 'Заезд после ' + cardData.offer.checkin + ', выезд до ' + cardData.offer.checkout;
 
   var cardFeaturesList = cardElement.querySelector('.popup__features');
-  // TODO
+  renderCardFeatures(cardData.offer.features, cardFeaturesList);
 
   var cardDescription = cardFeaturesList.nextElementSibling;
   cardDescription.textContent = cardData.offer.description;
 
   var cardPicturesList = cardElement.querySelector('.popup__pictures');
-  var cardPictureWrapper = cardPicturesList.querySelector('li');
-  for (var i = 0; i < cardData.offer.photos.length; i++) {
-    cardPictureWrapper.cloneNode(true);
-  }
+  renderCardPictures(cardData.offer.photos, cardPicturesList);
 
   fragment.appendChild(cardElement);
   insertToElement.insertBefore(fragment, insertBeforeElement);
+}
+
+/**
+ * Отрисовывает блок с удобствами
+ *
+ * @param {array} featuresList Список удобств
+ * @param {Node} featuresListElement Родительский элемент
+ */
+function renderCardFeatures(featuresList, featuresListElement) {
+  var fragment = document.createDocumentFragment();
+
+  cleanNode(featuresListElement);
+
+  for (var i = 0; i < featuresList.length; i++) {
+    var featureElement = document.createElement('li');
+    featureElement.classList.add('feature', 'feature--' + featuresList[i]);
+    fragment.appendChild(featureElement);
+  }
+
+  featuresListElement.appendChild(fragment);
+}
+
+/**
+ * Отрисовывает блок с фотографиями
+ *
+ * @param {array} cardPicturesList Список фотографий
+ * @param {Node} picturesListElement Родительский элемент
+ */
+function renderCardPictures(cardPicturesList, picturesListElement) {
+  var fragment = document.createDocumentFragment();
+
+  cleanNode(picturesListElement);
+
+  for (var i = 0; i < cardPicturesList.length; i++) {
+    var pictureElement = document.createElement('img');
+    pictureElement.setAttribute('src', cardPicturesList[i]);
+    pictureElement.width = 210;
+    fragment.appendChild(pictureElement);
+  }
+
+  picturesListElement.appendChild(fragment);
+}
+
+/**
+ * Удаляет потомков из элемента
+ *
+ * @param {Node} parent Родительский элемент, который нужно очистить
+ */
+function cleanNode(parent) {
+  var children = parent.children;
+
+  for (var i = children.length - 1; i >= 0; i--) {
+    parent.removeChild(children[i]);
+  }
 }
 
 /**
@@ -229,11 +282,10 @@ function getRandomElement(arr) {
 }
 
 /**
- * Удаляет случайный элемент из массива
- * и возвращает его
+ * Возвращает случайный элемент и удаляет его из исходного массива
  *
  * @param {array} arr Массив для поиска элемента.
- * @return {string} el Случайный элемент массива.
+ * @return {string} Случайный элемент массива.
  */
 function getRandomElementUnique(arr) {
   var removedEl = arr.splice(getRandomInt(0, arr.length - 1), 1);
@@ -264,23 +316,6 @@ function shuffleArray(arr) {
 }
 
 /**
- * Добавляет 0 перед числом меньше заданной длины
- *
- * @param {number} number Число, перед которым нужно добавить 0.
- * @param {number} length Минимальная длина строки, включая ведущие нули.
- * @return {string} str Итоговая строка.
- */
-function leadingZeroes(number, length) {
-  var str = '' + number;
-
-  while (str.length < length) {
-    str = '0' + str;
-  }
-
-  return str;
-}
-
-/**
  * Создает массив строк с адресами изображений аватаров
  *
  * @param {number} num Длина массива.
@@ -295,6 +330,23 @@ function generateAvatarLinks(num) {
   }
 
   return links;
+}
+
+/**
+ * Добавляет 0 перед числом меньше заданной длины
+ *
+ * @param {number} number Число, перед которым нужно добавить 0.
+ * @param {number} length Минимальная длина строки, включая ведущие нули.
+ * @return {string} str Итоговая строка.
+ */
+function leadingZeroes(number, length) {
+  var str = '' + number;
+
+  while (str.length < length) {
+    str = '0' + str;
+  }
+
+  return str;
 }
 
 /**
@@ -338,7 +390,7 @@ var notices = generateNotices(NOTICES_NUM, {
 MAP_ELEMENT.classList.remove('map--faded');
 
 // Отрисовываем метки
-renderPins(notices, MAP_PINS_ELEMENT);
+renderPins(notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
 
 // Отрисовываем первое объявление
 renderCard(notices[0], CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
