@@ -1,12 +1,40 @@
 'use strict';
 
 var NOTICES_NUM = 8;
-var OFFER_TITLES = ['Большая уютная квартира', 'Маленькая неуютная квартира', 'Огромный прекрасный дворец', 'Маленький ужасный дворец', 'Красивый гостевой домик', 'Некрасивый негостеприимный домик', 'Уютное бунгало далеко от моря', 'Неуютное бунгало по колено в воде'];
+
+var OFFER_AVATARS = generateAvatarLinks(NOTICES_NUM);
+
+var OFFER_TITLES = [
+  'Большая уютная квартира',
+  'Маленькая неуютная квартира',
+  'Огромный прекрасный дворец',
+  'Маленький ужасный дворец',
+  'Красивый гостевой домик',
+  'Некрасивый негостеприимный домик',
+  'Уютное бунгало далеко от моря',
+  'Неуютное бунгало по колено в воде'
+];
+
 var OFFER_TYPE = ['flat', 'house', 'bungalo'];
+
 var OFFER_CHECKIN = ['12:00', '13:00', '14:00'];
+
 var OFFER_CHECKOUT = ['12:00', '13:00', '14:00'];
-var OFFER_FEATURES = ['wifi', 'dishwasher', 'parking', 'washer', 'elevator', 'conditioner'];
-var OFFER_PHOTOS = ['http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://o0.github.io/assets/images/tokyo/hotel2.jpg', 'http://o0.github.io/assets/images/tokyo/hotel3.jpg'];
+
+var OFFER_FEATURES = [
+  'wifi',
+  'dishwasher',
+  'parking',
+  'washer',
+  'elevator',
+  'conditioner'
+];
+
+var OFFER_PHOTOS = [
+  'http://o0.github.io/assets/images/tokyo/hotel1.jpg',
+  'http://o0.github.io/assets/images/tokyo/hotel2.jpg',
+  'http://o0.github.io/assets/images/tokyo/hotel3.jpg'
+];
 
 var MIN_PRICE = 1000;
 var MAX_PRICE = 1000000;
@@ -40,48 +68,58 @@ var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
  * которые описывают объявления неподалёку
  *
  * @param {number} noticesNum Количество объявлений.
+ * @param {object} noticesOptions Возможные параметры объявлений.
  * @return {array} noticesData Массив объектов с обявлениями.
  */
-function generateNotices(noticesNum) {
+
+function generateNotices(noticesNum, noticesOptions) {
   var noticesData = [];
-  var offerTitlesCopy = OFFER_TITLES.slice();
-  var authorAvatars = generateAvatars(noticesNum);
 
   for (var i = 0; i < noticesNum; i++) {
-
-    var locationX = getRandomInt(MIN_X, MAX_X);
-    var locationY = getRandomInt(MIN_Y, MAX_Y);
-
-    var notice = {
-      'author': {
-        'avatar': 'img/avatars/user' + getRandomElementUnique(authorAvatars) + '.png'
-      },
-
-      'offer': {
-        'title': getRandomElementUnique(offerTitlesCopy),
-        'address': locationX + ', ' + locationY,
-        'price': getRandomInt(MIN_PRICE, MAX_PRICE),
-        'type': getRandomElement(OFFER_TYPE),
-        'rooms': getRandomInt(MIN_ROOMS, MAX_ROOMS),
-        'guests': getRandomInt(MIN_GUESTS, MAX_GUESTS),
-        'checkin': getRandomElement(OFFER_CHECKIN),
-        'checkout': getRandomElement(OFFER_CHECKOUT),
-        'features': null,
-        'description': '',
-        'photos': shuffleArray(OFFER_PHOTOS.slice())
-      },
-
-      'location': {
-        'x': locationX,
-        'y': locationY
-      }
-    };
-
-    noticesData[i] = notice;
+    var newNotice = generateRandomNotice(noticesOptions);
+    noticesData.push(newNotice);
   }
 
-  console.log(noticesData);
   return noticesData;
+}
+
+/**
+ * Создает случайное объявление
+ *
+ * @param {object} options Возможные параметры объявления.
+ * @return {object} notice Итоговое объявление.
+ */
+function generateRandomNotice(options) {
+  var locationX = getRandomInt(options.locationXMin, options.locationXMax);
+  var locationY = getRandomInt(options.locationYMin, options.locationYMax);
+
+  var notice = {
+    'author': {
+      'avatar': getRandomElementUnique(options.authorAvatars)
+    },
+
+    'offer': {
+      'title': getRandomElementUnique(options.offerTitles),
+      'address': locationX + ', ' + locationY,
+      'price': getRandomInt(options.priceMin, options.priceMax),
+      'type': getRandomElement(options.offerType),
+      'rooms': getRandomInt(options.roomsMin, options.roomsMax),
+      'guests': getRandomInt(options.guestsMin, options.guestsMax),
+      'checkin': getRandomElement(options.offerCheckIn),
+      'checkout': getRandomElement(options.offerCheckOut),
+      'features': options.offerFeatures,
+      'description': '',
+      'photos': shuffleArray(options.offerPhotos)
+    },
+
+    'location': {
+      'x': locationX,
+      'y': locationY
+    }
+  };
+
+  console.log(notice);
+  return notice;
 }
 
 /**
@@ -125,6 +163,8 @@ function renderPin(pinData, pinTemplate, pinWidth, pinHeight) {
  *
  * @param {object} cardData Данные для объявления.
  * @param {Node} cardTemplate Шаблон карточки объявления.
+ * @param {Node} insertToElement Элемент, в который вставляется карточка.
+ * @param {Node} insertBeforeElement Элемент, перед которым вставляется карточка.
  */
 function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement) {
   var fragment = document.createDocumentFragment();
@@ -241,18 +281,20 @@ function leadingZeroes(number, length) {
 }
 
 /**
- * Создает массив строк с числами с ведущим нулем
- * вида '01', '02', '03' и т.д.
+ * Создает массив строк с адресами изображений аватаров
  *
- * @param {number} length Длина массива.
- * @return {array} arr Итоговый массив строк.
+ * @param {number} num Длина массива.
+ * @return {array} links Итоговый массив.
  */
-function generateAvatars(length) {
-  var arr = [];
-  for (var i = 1; i <= length; i++) {
-    arr.push(leadingZeroes(i, 2));
+function generateAvatarLinks(num) {
+  var links = [];
+
+  for (var i = 1; i <= num; i++) {
+    var link = 'img/avatars/user' + leadingZeroes(i, 2) + '.png';
+    links.push(link);
   }
-  return arr;
+
+  return links;
 }
 
 /**
@@ -272,7 +314,25 @@ function getOfferTypeName(type) {
 }
 
 // Генерируем объявления
-var notices = generateNotices(NOTICES_NUM);
+var notices = generateNotices(NOTICES_NUM, {
+  authorAvatars: OFFER_AVATARS,
+  offerTitles: OFFER_TITLES,
+  offerType: OFFER_TYPE,
+  offerCheckIn: OFFER_CHECKIN,
+  offerCheckOut: OFFER_CHECKOUT,
+  offerFeatures: OFFER_FEATURES,
+  offerPhotos: OFFER_PHOTOS,
+  priceMin: MIN_PRICE,
+  priceMax: MAX_PRICE,
+  roomsMin: MIN_ROOMS,
+  roomsMax: MAX_ROOMS,
+  guestsMin: MIN_GUESTS,
+  guestsMax: MAX_GUESTS,
+  locationXMin: MIN_X,
+  locationXMax: MAX_X,
+  locationYMin: MIN_Y,
+  locationYMax: MAX_Y
+});
 
 // Переключаем карту в активное состояние
 MAP_ELEMENT.classList.remove('map--faded');
