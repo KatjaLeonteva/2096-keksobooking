@@ -80,6 +80,8 @@ function generateNotices(noticesNum, noticesOptions) {
   noticesOptions.authorAvatars = authorAvatarsCopy;
   var offerTitlesCopy = noticesOptions.offerTitles.slice();
   noticesOptions.offerTitles = offerTitlesCopy;
+  var offerPhotosCopy = noticesOptions.offerPhotos.slice();
+  noticesOptions.offerPhotos = offerPhotosCopy;
 
   for (var i = 0; i < noticesNum; i++) {
     var newNotice = generateRandomNotice(noticesOptions);
