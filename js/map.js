@@ -2,7 +2,7 @@
 
 var NOTICES_NUM = 8;
 
-var OFFER_AVATARS = generateAvatarLinks(NOTICES_NUM);
+var AUTHOR_AVATARS = generateAvatarLinks(NOTICES_NUM);
 
 var OFFER_TITLES = [
   'Большая уютная квартира',
@@ -74,6 +74,12 @@ var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
 
 function generateNotices(noticesNum, noticesOptions) {
   var noticesData = [];
+
+  // Копируем массивы, чтобы не менять исходные константы
+  var authorAvatarsCopy = noticesOptions.authorAvatars.slice();
+  noticesOptions.authorAvatars = authorAvatarsCopy;
+  var offerTitlesCopy = noticesOptions.offerTitles.slice();
+  noticesOptions.offerTitles = offerTitlesCopy;
 
   for (var i = 0; i < noticesNum; i++) {
     var newNotice = generateRandomNotice(noticesOptions);
@@ -367,7 +373,7 @@ function getOfferTypeName(type) {
 
 // Генерируем объявления
 var notices = generateNotices(NOTICES_NUM, {
-  authorAvatars: OFFER_AVATARS,
+  authorAvatars: AUTHOR_AVATARS,
   offerTitles: OFFER_TITLES,
   offerType: OFFER_TYPE,
   offerCheckIn: OFFER_CHECKIN,
