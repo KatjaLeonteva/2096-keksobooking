@@ -395,10 +395,10 @@ var notices = generateNotices(NOTICES_NUM, {
 });
 
 // Переключаем карту в активное состояние
-MAP_ELEMENT.classList.remove('map--faded');
+//MAP_ELEMENT.classList.remove('map--faded');
 
 // Отрисовываем метки
-renderPins(notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
+//renderPins(notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
 
 // Отрисовываем первое объявление
-renderCard(notices[0], CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
+//renderCard(notices[0], CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
