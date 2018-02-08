@@ -398,7 +398,7 @@ function setAddress(input, pin, hasPointer) {
   var locationY = pin.offsetTop + pinHeight / 2 + pointerHeight;
 
   input.value = locationX + ', ' + locationY;
-};
+}
 
 // Генерируем объявления
 var notices = generateNotices(NOTICES_NUM, {
@@ -431,7 +431,7 @@ function mainPinDragHandler() {
   FORM.classList.remove('notice__form--disabled');
 
   var fieldsets = FORM.querySelectorAll('fieldset');
-  for(var i = 0; i < fieldsets.length; i++) {
+  for (var i = 0; i < fieldsets.length; i++) {
     fieldsets[i].disabled = false;
   }
 
