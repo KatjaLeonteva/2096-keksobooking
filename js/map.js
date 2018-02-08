@@ -51,6 +51,7 @@ var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
 
 var MAP_ELEMENT = document.querySelector('.map');
+var MAP_MAIN_PIN = MAP_ELEMENT.querySelector('.map__pin--main');
 var MAP_PINS_ELEMENT = MAP_ELEMENT.querySelector('.map__pins');
 var MAP_FILTERS_ELEMENT = MAP_ELEMENT.querySelector('.map__filters-container');
 
@@ -62,6 +63,8 @@ var PIN_TEMPLATE = TEMPLATE.querySelector('.map__pin');
 
 // Шаблон объявления
 var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
+
+var FORM = document.querySelector('.notice__form');
 
 /**
  * Создает массив, состоящий из случайно сгенерированных объектов,
@@ -373,6 +376,16 @@ function getOfferTypeName(type) {
   return names[type];
 }
 
+function getPinLocation(pin) {
+  var pinWidth = parseInt(getComputedStyle(pin).width, 10);
+  var pinHeight = parseInt(getComputedStyle(pin).height, 10);
+
+  var locationX = pin.offsetTop + pinHeight / 2;
+  var locationY = pin.offsetLeft + pinWidth / 2;
+
+  return locationX + ', ' + locationY;
+};
+
 // Генерируем объявления
 var notices = generateNotices(NOTICES_NUM, {
   authorAvatars: AUTHOR_AVATARS,
@@ -394,11 +407,14 @@ var notices = generateNotices(NOTICES_NUM, {
   locationYMax: MAX_Y
 });
 
-// Переключаем карту в активное состояние
-//MAP_ELEMENT.classList.remove('map--faded');
+FORM.querySelector('[name="address"]').value = getPinLocation(MAP_MAIN_PIN);
 
-// Отрисовываем метки
-//renderPins(notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
+// Переключаем карту в активное состояние
+function mainPinDragHandler() {
+  MAP_ELEMENT.classList.remove('map--faded');
+  renderPins(notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
+}
+MAP_MAIN_PIN.addEventListener('mouseup', mainPinDragHandler);
 
 // Отрисовываем первое объявление
 //renderCard(notices[0], CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
