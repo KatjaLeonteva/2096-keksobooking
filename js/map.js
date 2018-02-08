@@ -65,6 +65,7 @@ var PIN_TEMPLATE = TEMPLATE.querySelector('.map__pin');
 var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
 
 var FORM = document.querySelector('.notice__form');
+var ADDRESS_INPUT = FORM.querySelector('[name="address"]');
 
 /**
  * Создает массив, состоящий из случайно сгенерированных объектов,
@@ -376,14 +377,23 @@ function getOfferTypeName(type) {
   return names[type];
 }
 
-function getPinLocation(pin) {
+/**
+ * Заполняет поле адреса координатами,
+ * на которые метка указывает своим острым концом.
+ *
+ * @param {Node} input Поле адреса.
+ * @param {Node} pin Метка.
+ * @param {boolean} hasPointer Учитывать ли в расчетах указатель метки.
+ */
+function setAddress(input, pin, hasPointer) {
   var pinWidth = parseInt(getComputedStyle(pin).width, 10);
   var pinHeight = parseInt(getComputedStyle(pin).height, 10);
+  var pointerHeight = hasPointer ? parseInt(getComputedStyle(pin, ':after').borderTopWidth, 10) : 0;
 
-  var locationX = pin.offsetTop + pinHeight / 2;
-  var locationY = pin.offsetLeft + pinWidth / 2;
+  var locationX = pin.offsetLeft + pinWidth / 2;
+  var locationY = pin.offsetTop + pinHeight / 2 + pointerHeight;
 
-  return locationX + ', ' + locationY;
+  input.value = locationX + ', ' + locationY;
 };
 
 // Генерируем объявления
@@ -407,13 +417,22 @@ var notices = generateNotices(NOTICES_NUM, {
   locationYMax: MAX_Y
 });
 
-FORM.querySelector('[name="address"]').value = getPinLocation(MAP_MAIN_PIN);
+setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, false);
 
-// Переключаем карту в активное состояние
+// Переключаем карту и форму в активное состояние
 function mainPinDragHandler() {
   MAP_ELEMENT.classList.remove('map--faded');
   renderPins(notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
+
+  FORM.classList.remove('notice__form--disabled');
+  var fieldsets = FORM.querySelectorAll('fieldset');
+  for(var i = 0; i < fieldsets.length; i++) {
+    fieldsets[i].disabled = false;
+  }
+
+  setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, true);
 }
+
 MAP_MAIN_PIN.addEventListener('mouseup', mainPinDragHandler);
 
 // Отрисовываем первое объявление
