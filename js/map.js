@@ -169,6 +169,10 @@ function renderPin(pinData, template, width, height) {
 
   pinElement.querySelector('img').setAttribute('src', pinData.author.avatar);
 
+  pinElement.addEventListener('click', function () {
+    renderCard(pinData, CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
+  });
+
   return pinElement;
 }
 
@@ -425,6 +429,7 @@ function mainPinDragHandler() {
   renderPins(notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
 
   FORM.classList.remove('notice__form--disabled');
+
   var fieldsets = FORM.querySelectorAll('fieldset');
   for(var i = 0; i < fieldsets.length; i++) {
     fieldsets[i].disabled = false;
@@ -435,5 +440,3 @@ function mainPinDragHandler() {
 
 MAP_MAIN_PIN.addEventListener('mouseup', mainPinDragHandler);
 
-// Отрисовываем первое объявление
-//renderCard(notices[0], CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
