@@ -121,7 +121,7 @@ function generateRandomNotice(options) {
       'checkout': getRandomElement(options.offerCheckOut),
       'features': options.offerFeatures.slice(0, getRandomInt(0, options.offerFeatures.length)), // Получаем массив удобств случайной длины, порядок сохраняется
       'description': '',
-      'photos': shuffleArray(options.offerPhotos)
+      'photos': shuffleArray(options.offerPhotos).slice() // Копируем перемешанный массив
     },
 
     'location': {
