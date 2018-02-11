@@ -170,10 +170,40 @@ function renderPin(pinData, template, width, height) {
   pinElement.querySelector('img').setAttribute('src', pinData.author.avatar);
 
   pinElement.addEventListener('click', function () {
-    renderCard(pinData, CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
+    if (pinElement.className.indexOf('map__pin--selected') === -1) {
+      toggleSelectedPin(MAP_PINS_ELEMENT.querySelectorAll('.map__pin'), pinElement);
+      removeCards(MAP_ELEMENT);
+      renderCard(pinData, CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
+    }
   });
 
   return pinElement;
+}
+
+/**
+ * Добавляет класс --selected выбранной метке
+ * удаляет этот класс с выбранной ранее метки
+ *
+ * @param {array} pins Все метки.
+ * @param {Node} selectedPin Выбранная метка.
+ */
+function toggleSelectedPin(pins, selectedPin) {
+  for (var i = 0; i < pins.length; i++) {
+    pins[i].classList.remove('map__pin--selected');
+  }
+  selectedPin.classList.add('map__pin--selected');
+}
+
+/**
+ * Удаляет ранее отрисованные карточки объявлений.
+ *
+ * @param {Node} map Элемент, в котором находятся карточки.
+ */
+function removeCards(map) {
+  var cards = map.querySelectorAll('.map__card');
+  for (var i = cards.length - 1; i >= 0; i--) {
+    cards[i].remove();
+  }
 }
 
 /**
@@ -220,6 +250,10 @@ function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement
 
   fragment.appendChild(cardElement);
   insertToElement.insertBefore(fragment, insertBeforeElement);
+
+  cardElement.querySelector('.popup__close').addEventListener('click', function () {
+    cardElement.remove();
+  });
 }
 
 /**
