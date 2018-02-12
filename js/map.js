@@ -172,7 +172,7 @@ function renderPin(pinData, template, width, height) {
   pinElement.addEventListener('click', function () {
     if (pinElement.className.indexOf('map__pin--selected') === -1) {
       toggleSelectedPin(MAP_PINS_ELEMENT.querySelectorAll('.map__pin'), pinElement);
-      removeCards(MAP_ELEMENT);
+      cleanNode(MAP_ELEMENT, '.map__card');
       renderCard(pinData, CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
     }
   });
@@ -192,18 +192,6 @@ function toggleSelectedPin(pins, selectedPin) {
     pins[i].classList.remove('map__pin--selected');
   }
   selectedPin.classList.add('map__pin--selected');
-}
-
-/**
- * Удаляет ранее отрисованные карточки объявлений.
- *
- * @param {Node} map Элемент, в котором находятся карточки.
- */
-function removeCards(map) {
-  var cards = map.querySelectorAll('.map__card');
-  for (var i = cards.length - 1; i >= 0; i--) {
-    cards[i].remove();
-  }
 }
 
 /**
@@ -265,7 +253,7 @@ function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement
 function renderCardFeatures(featuresList, featuresListElement) {
   var fragment = document.createDocumentFragment();
 
-  cleanNode(featuresListElement);
+  cleanNode(featuresListElement, null);
 
   for (var i = 0; i < featuresList.length; i++) {
     var featureElement = document.createElement('li');
@@ -285,7 +273,7 @@ function renderCardFeatures(featuresList, featuresListElement) {
 function renderCardPictures(cardPicturesList, picturesListElement) {
   var fragment = document.createDocumentFragment();
 
-  cleanNode(picturesListElement);
+  cleanNode(picturesListElement, null);
 
   for (var i = 0; i < cardPicturesList.length; i++) {
     var pictureElement = document.createElement('img');
@@ -301,9 +289,15 @@ function renderCardPictures(cardPicturesList, picturesListElement) {
  * Удаляет потомков из элемента
  *
  * @param {Node} parent Родительский элемент, который нужно очистить
+ * @param {string} selector Селектор для потомков (не обязательно)
  */
-function cleanNode(parent) {
-  var children = parent.children;
+function cleanNode(parent, selector) {
+  var children = [];
+  if (selector) {
+    children = parent.querySelectorAll(selector);
+  } else {
+    children = parent.children;
+  }
 
   for (var i = children.length - 1; i >= 0; i--) {
     parent.removeChild(children[i]);
@@ -474,3 +468,57 @@ function mainPinDragHandler() {
 
 MAP_MAIN_PIN.addEventListener('mouseup', mainPinDragHandler);
 
+// Валидация
+
+/**
+ * Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
+ * все заполненные поля стираются,
+ * метки похожих объявлений и карточка активного объявления удаляются,
+ * метка адреса возвращается в исходное положение,
+ * значение поля адреса корректируется соответственно положению метки.
+ */
+FORM.addEventListener('reset', function () {
+  MAP_ELEMENT.classList.add('map--faded');
+  FORM.classList.add('notice__form--disabled');
+  cleanNode(MAP_ELEMENT, '.map__card');
+  cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
+  setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, false); // TODO должно срабатывать после сброса полей
+});
+
+// Валидация поля ввода заголовка объявления
+var titleInput = FORM.querySelector('[name="title"]');
+
+titleInput.addEventListener('invalid', function () {
+  if (titleInput.validity.tooShort) {
+    titleInput.setCustomValidity('Заголовок объявления должен состоять минимум из 30 символов');
+  } else if (titleInput.validity.tooLong) {
+    titleInput.setCustomValidity('Заголовок объявления не должен превышать 100 символов');
+  } else if (titleInput.validity.valueMissing) {
+    titleInput.setCustomValidity('Обязательное поле');
+  } else {
+    titleInput.setCustomValidity('');
+  }
+});
+
+// Фикс для Edge (не поддерживает атрибут minlength)
+titleInput.addEventListener('input', function (evt) {
+  var target = evt.target;
+  if (target.value.length < 30) {
+    target.setCustomValidity('Заголовок объявления должен состоять минимум из 30 символов');
+  } else {
+    target.setCustomValidity('');
+  }
+});
+
+// Валидация поля ввода цены
+var priceInput = FORM.querySelector('[name="price"]');
+
+priceInput.addEventListener('invalid', function () {
+  if (priceInput.validity.rangeOverflow) {
+    priceInput.setCustomValidity('Цена не должна превышать 1 000 000 руб.');
+  } else if (priceInput.validity.valueMissing) {
+    priceInput.setCustomValidity('Обязательное поле');
+  } else {
+    priceInput.setCustomValidity('');
+  }
+});
