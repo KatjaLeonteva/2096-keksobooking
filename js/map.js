@@ -493,12 +493,44 @@ titleInput.addEventListener('input', function (evt) {
   }
 });
 
+/**
+ * Поле «Тип жилья» влияет на минимальное значение поля «Цена за ночь»:
+ *
+ * «Лачуга» — минимальная цена за ночь 0;
+ * «Квартира» — минимальная цена за ночь 1 000;
+ * «Дом» — минимальная цена 5 000;
+ * «Дворец» — минимальная цена 10 000.
+ */
+var typeInput = FORM.querySelector('[name="type"]');
+
+typeInput.addEventListener('change', function () {
+  var typeValue = typeInput.value;
+  switch (typeValue) {
+    case 'flat':
+      priceInput.setAttribute('min', 1000);
+      break;
+    case 'house':
+      priceInput.setAttribute('min', 5000);
+      break;
+    case 'palace':
+      priceInput.setAttribute('min', 10000);
+      break;
+    default:
+      priceInput.setAttribute('min', 0);
+  }
+});
+
+
 // Валидация поля ввода цены
 var priceInput = FORM.querySelector('[name="price"]');
 
 priceInput.addEventListener('invalid', function () {
   if (priceInput.validity.rangeOverflow) {
-    priceInput.setCustomValidity('Цена не должна превышать 1 000 000 руб.');
+    var maxPrice = priceInput.getAttribute('max') || '1 000 000';
+    priceInput.setCustomValidity('Цена не должна превышать ' + maxPrice + ' руб.');
+  } else if (priceInput.validity.rangeUnderflow) {
+    var minPrice = priceInput.getAttribute('min') || '0';
+    priceInput.setCustomValidity('Для этого типа жилья цена не должна быть ниже ' + minPrice + ' руб.');
   } else if (priceInput.validity.valueMissing) {
     priceInput.setCustomValidity('Обязательное поле');
   } else {
