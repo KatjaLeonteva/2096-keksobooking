@@ -530,6 +530,40 @@ priceInput.addEventListener('invalid', function () {
   }
 });
 
+/**
+ * Поле «Количество комнат» синхронизировано с полем «Количество гостей»,
+ * таким образом, что при выборе количества комнат
+ * вводятся ограничения на допустимые варианты выбора количества гостей:
+ * 1 комната — «для 1 гостя»;
+ * 2 комнаты — «для 2 гостей» или «для 1 гостя»;
+ * 3 комнаты — «для 3 гостей», «для 2 гостей» или «для 1 гостя»;
+ * 100 комнат — «не для гостей».
+ */
+var roomsInput = FORM.querySelector('[name="rooms"]');
+var capacityInput = FORM.querySelector('[name="capacity"]');
+var rulesRoomCapacity = {
+  '1': ['1'],
+  '2': ['1', '2'],
+  '3': ['1','2', '3'],
+  '100': ['0']
+};
+
+roomsInput.addEventListener('change', function () {
+  checkCombination(roomsInput, capacityInput, rulesRoomCapacity, 'Выберите другое количество мест');
+});
+
+function checkCombination(mainField, dependentField, compareRules, message) {
+  if (isInvalidCombination(mainField, dependentField, compareRules)) {
+    dependentField.setCustomValidity(message);
+  } else {
+    dependentField.setCustomValidity('');
+  }
+}
+
+function isInvalidCombination(field1, field2, rules) {
+  return (rules[field1.value].indexOf(field2.value) === -1);
+}
+
 // Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
 var formReset = FORM.querySelector('.form__reset');
 
