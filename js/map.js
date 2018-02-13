@@ -544,7 +544,7 @@ var capacityInput = FORM.querySelector('[name="capacity"]');
 var rulesRoomCapacity = {
   '1': ['1'],
   '2': ['1', '2'],
-  '3': ['1','2', '3'],
+  '3': ['1', '2', '3'],
   '100': ['0']
 };
 
@@ -562,6 +562,33 @@ function checkCombination(mainField, dependentField, compareRules, message) {
 
 function isInvalidCombination(field1, field2, rules) {
   return (rules[field1.value].indexOf(field2.value) === -1);
+}
+
+/**
+ * Поля «Время заезда» и «Время выезда» синхронизированы:
+ * при изменении значения одного поля, во втором выделяется соответствующее ему.
+ * Например, если время заезда указано «после 14»,
+ * то время выезда будет равно «до 14» и наоборот.
+ */
+var timeinInput = FORM.querySelector('[name="timein"]');
+var timeoutInput = FORM.querySelector('[name="timeout"]');
+
+timeinInput.addEventListener('change', function () {
+  syncFields(timeinInput, timeoutInput);
+});
+
+timeoutInput.addEventListener('change', function () {
+  syncFields(timeoutInput, timeinInput);
+});
+
+function syncFields(field1, field2) {
+  var value1 = field1.value;
+  var options = field2.options;
+  for (var i = 0; i < options.length; i++) {
+    if (options[i].value === value1) {
+      field2.selectedIndex = i;
+    }
+  }
 }
 
 // Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
