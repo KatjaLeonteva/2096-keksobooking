@@ -463,7 +463,11 @@ function mainPinDragHandler() {
     fieldsets[i].disabled = false;
   }
 
+  // Нужно чтобы валидация работала правильно,
+  // если пользователь не будет изменять эти поля
   setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, true);
+  setMinPrice(typeSelect.value);
+  checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
 }
 
 MAP_MAIN_PIN.addEventListener('mouseup', mainPinDragHandler);
@@ -503,15 +507,18 @@ titleInput.addEventListener('input', function (evt) {
  */
 var typeSelect = FORM.querySelector('[name="type"]');
 
-typeSelect.addEventListener('change', function () {
-  var typeValue = typeSelect.value;
-  var minPrice = {
+typeSelect.addEventListener('change', function (evt) {
+  setMinPrice(evt.target.value);
+});
+
+function setMinPrice(propertyType) {
+  var minPrices = {
     'flat': 1000,
     'house': 5000,
     'palace': 10000
   };
-  priceInput.setAttribute('min', minPrice[typeValue] || 0);
-});
+  priceInput.setAttribute('min', minPrices[propertyType] || 0);
+}
 
 // ТЗ 2.2, 2.3. Валидация поля ввода цены
 var priceInput = FORM.querySelector('[name="price"]');
@@ -575,28 +582,40 @@ function syncFields(select1, select2) {
  */
 var roomsSelect = FORM.querySelector('[name="rooms"]');
 var capacitySelect = FORM.querySelector('[name="capacity"]');
-var rulesRoomCapacity = {
+var rulesRoomsCapacity = {
   '1': ['1'],
   '2': ['1', '2'],
   '3': ['1', '2', '3'],
   '100': ['0']
 };
 
-roomsSelect.addEventListener('change', function () {
-  checkCombination(roomsSelect, capacitySelect, rulesRoomCapacity, 'Выберите другое количество мест');
-});
+function checkRoomsCapacity(rooms, capacity, rules) {
+  var allowedCapacity = rules[rooms.value];
 
-function checkCombination(mainField, dependentField, compareRules, message) {
-  if (isInvalidCombination(mainField, dependentField, compareRules)) {
-    dependentField.setCustomValidity(message);
+  // Ограничиваем возможность выбора неправильных вариантов
+  for (var i = 0; i < capacity.options.length; i++) {
+    if (allowedCapacity.indexOf(capacity.options[i].value) === -1) {
+      capacity.options[i].disabled = true;
+    } else {
+      capacity.options[i].disabled = false;
+    }
+  }
+
+  // Добавляем / убираем сообщение об ошибке
+  if (allowedCapacity.indexOf(capacity.value) === -1) {
+    capacity.setCustomValidity('Выберите другое количество мест');
   } else {
-    dependentField.setCustomValidity('');
+    capacity.setCustomValidity('');
   }
 }
 
-function isInvalidCombination(field1, field2, rules) {
-  return (rules[field1.value].indexOf(field2.value) === -1);
-}
+roomsSelect.addEventListener('change', function () {
+  checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
+});
+
+capacitySelect.addEventListener('change', function () {
+  checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
+});
 
 // ТЗ 1.7. Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
 var formReset = FORM.querySelector('.form__reset');
