@@ -463,12 +463,16 @@ function mainPinDragHandler() {
     fieldsets[i].disabled = false;
   }
 
+  // ТЗ 2.4. Отключаем ручное редактирование поля адрес
+  // Не используется атрибут disabled, т.к. не отправляется значение при сабмите
+  ADDRESS_INPUT.style.pointerEvents = 'none';
+
   setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, true);
 }
 
 MAP_MAIN_PIN.addEventListener('mouseup', mainPinDragHandler);
 
-// Валидация поля ввода заголовка объявления
+// Валидация поля ввода заголовка объявления (ТЗ 2.1)
 var titleInput = FORM.querySelector('[name="title"]');
 
 titleInput.addEventListener('invalid', function () {
@@ -494,17 +498,17 @@ titleInput.addEventListener('input', function (evt) {
 });
 
 /**
- * Поле «Тип жилья» влияет на минимальное значение поля «Цена за ночь»:
+ * ТЗ 2.3. Поле «Тип жилья» влияет на минимальное значение поля «Цена за ночь»:
  *
  * «Лачуга» — минимальная цена за ночь 0;
  * «Квартира» — минимальная цена за ночь 1 000;
  * «Дом» — минимальная цена 5 000;
  * «Дворец» — минимальная цена 10 000.
  */
-var typeInput = FORM.querySelector('[name="type"]');
+var typeSelect = FORM.querySelector('[name="type"]');
 
-typeInput.addEventListener('change', function () {
-  var typeValue = typeInput.value;
+typeSelect.addEventListener('change', function () {
+  var typeValue = typeSelect.value;
   var minPrice = {
     'flat': 1000,
     'house': 5000,
@@ -513,7 +517,7 @@ typeInput.addEventListener('change', function () {
   priceInput.setAttribute('min', minPrice[typeValue] || 0);
 });
 
-// Валидация поля ввода цены
+// ТЗ 2.2, 2.3. Валидация поля ввода цены
 var priceInput = FORM.querySelector('[name="price"]');
 
 priceInput.addEventListener('invalid', function () {
@@ -531,7 +535,41 @@ priceInput.addEventListener('invalid', function () {
 });
 
 /**
- * Поле «Количество комнат» синхронизировано с полем «Количество гостей»,
+ * Т3 2.5. Поля «Время заезда» и «Время выезда» синхронизированы:
+ * при изменении значения одного поля, во втором выделяется соответствующее ему.
+ * Например, если время заезда указано «после 14»,
+ * то время выезда будет равно «до 14» и наоборот.
+ */
+var timeinSelect = FORM.querySelector('[name="timein"]');
+var timeoutSelect = FORM.querySelector('[name="timeout"]');
+
+timeinSelect.addEventListener('change', function () {
+  syncFields(timeinSelect, timeoutSelect);
+});
+
+timeoutSelect.addEventListener('change', function () {
+  syncFields(timeoutSelect, timeinSelect);
+});
+
+/**
+ * Синхронизирует значения селектов.
+ * Второму селекту ставит такое же значение, как в первом.
+ *
+ * @param {Node} select1 Первый селект.
+ * @param {Node} select2 Второй селект.
+ */
+function syncFields(select1, select2) {
+  var value1 = select1.value;
+  var options = select2.options;
+  for (var i = 0; i < options.length; i++) {
+    if (options[i].value === value1) {
+      select2.selectedIndex = i;
+    }
+  }
+}
+
+/**
+ * ТЗ 2.6. Поле «Количество комнат» синхронизировано с полем «Количество гостей»,
  * таким образом, что при выборе количества комнат
  * вводятся ограничения на допустимые варианты выбора количества гостей:
  * 1 комната — «для 1 гостя»;
@@ -539,8 +577,8 @@ priceInput.addEventListener('invalid', function () {
  * 3 комнаты — «для 3 гостей», «для 2 гостей» или «для 1 гостя»;
  * 100 комнат — «не для гостей».
  */
-var roomsInput = FORM.querySelector('[name="rooms"]');
-var capacityInput = FORM.querySelector('[name="capacity"]');
+var roomsSelect = FORM.querySelector('[name="rooms"]');
+var capacitySelect = FORM.querySelector('[name="capacity"]');
 var rulesRoomCapacity = {
   '1': ['1'],
   '2': ['1', '2'],
@@ -548,8 +586,8 @@ var rulesRoomCapacity = {
   '100': ['0']
 };
 
-roomsInput.addEventListener('change', function () {
-  checkCombination(roomsInput, capacityInput, rulesRoomCapacity, 'Выберите другое количество мест');
+roomsSelect.addEventListener('change', function () {
+  checkCombination(roomsSelect, capacitySelect, rulesRoomCapacity, 'Выберите другое количество мест');
 });
 
 function checkCombination(mainField, dependentField, compareRules, message) {
@@ -564,34 +602,7 @@ function isInvalidCombination(field1, field2, rules) {
   return (rules[field1.value].indexOf(field2.value) === -1);
 }
 
-/**
- * Поля «Время заезда» и «Время выезда» синхронизированы:
- * при изменении значения одного поля, во втором выделяется соответствующее ему.
- * Например, если время заезда указано «после 14»,
- * то время выезда будет равно «до 14» и наоборот.
- */
-var timeinInput = FORM.querySelector('[name="timein"]');
-var timeoutInput = FORM.querySelector('[name="timeout"]');
-
-timeinInput.addEventListener('change', function () {
-  syncFields(timeinInput, timeoutInput);
-});
-
-timeoutInput.addEventListener('change', function () {
-  syncFields(timeoutInput, timeinInput);
-});
-
-function syncFields(field1, field2) {
-  var value1 = field1.value;
-  var options = field2.options;
-  for (var i = 0; i < options.length; i++) {
-    if (options[i].value === value1) {
-      field2.selectedIndex = i;
-    }
-  }
-}
-
-// Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
+// ТЗ 1.7. Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
 var formReset = FORM.querySelector('.form__reset');
 
 formReset.addEventListener('click', function (evt) {
