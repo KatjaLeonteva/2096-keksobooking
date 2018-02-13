@@ -468,23 +468,6 @@ function mainPinDragHandler() {
 
 MAP_MAIN_PIN.addEventListener('mouseup', mainPinDragHandler);
 
-// Валидация
-
-/**
- * Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
- * все заполненные поля стираются,
- * метки похожих объявлений и карточка активного объявления удаляются,
- * метка адреса возвращается в исходное положение,
- * значение поля адреса корректируется соответственно положению метки.
- */
-FORM.addEventListener('reset', function () {
-  MAP_ELEMENT.classList.add('map--faded');
-  FORM.classList.add('notice__form--disabled');
-  cleanNode(MAP_ELEMENT, '.map__card');
-  cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
-  setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, false); // TODO должно срабатывать после сброса полей
-});
-
 // Валидация поля ввода заголовка объявления
 var titleInput = FORM.querySelector('[name="title"]');
 
@@ -521,4 +504,27 @@ priceInput.addEventListener('invalid', function () {
   } else {
     priceInput.setCustomValidity('');
   }
+});
+
+// Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
+var formReset = FORM.querySelector('.form__reset');
+
+formReset.addEventListener('click', function (evt) {
+  evt.preventDefault();
+
+  // Все заполненные поля стираются
+  FORM.reset();
+
+  // Метки похожих объявлений и карточка активного объявления удаляются
+  cleanNode(MAP_ELEMENT, '.map__card');
+  cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
+
+  // Карта и форма переходят в неактивное состояние
+  MAP_ELEMENT.classList.add('map--faded');
+  FORM.classList.add('notice__form--disabled');
+
+  // TODO метка адреса возвращается в исходное положение
+
+  // Значение поля адреса корректируется соответственно положению метки
+  setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, false);
 });
