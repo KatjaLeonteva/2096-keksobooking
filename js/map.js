@@ -608,7 +608,9 @@ formReset.addEventListener('click', function (evt) {
   MAP_ELEMENT.classList.add('map--faded');
   FORM.classList.add('notice__form--disabled');
 
-  // TODO метка адреса возвращается в исходное положение
+  // Метка адреса возвращается в исходное положение
+  MAP_MAIN_PIN.style.top = '';
+  MAP_MAIN_PIN.style.left = '';
 
   // Значение поля адреса корректируется соответственно положению метки
   setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, false);
