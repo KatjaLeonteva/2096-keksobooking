@@ -505,21 +505,13 @@ var typeInput = FORM.querySelector('[name="type"]');
 
 typeInput.addEventListener('change', function () {
   var typeValue = typeInput.value;
-  switch (typeValue) {
-    case 'flat':
-      priceInput.setAttribute('min', 1000);
-      break;
-    case 'house':
-      priceInput.setAttribute('min', 5000);
-      break;
-    case 'palace':
-      priceInput.setAttribute('min', 10000);
-      break;
-    default:
-      priceInput.setAttribute('min', 0);
-  }
+  var minPrice = {
+    'flat': 1000,
+    'house': 5000,
+    'palace': 10000
+  };
+  priceInput.setAttribute('min', minPrice[typeValue] || 0);
 });
-
 
 // Валидация поля ввода цены
 var priceInput = FORM.querySelector('[name="price"]');
