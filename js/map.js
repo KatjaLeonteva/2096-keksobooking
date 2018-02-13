@@ -463,10 +463,6 @@ function mainPinDragHandler() {
     fieldsets[i].disabled = false;
   }
 
-  // ТЗ 2.4. Отключаем ручное редактирование поля адрес
-  // Не используется атрибут disabled, т.к. не отправляется значение при сабмите
-  ADDRESS_INPUT.style.pointerEvents = 'none';
-
   setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, true);
 }
 
