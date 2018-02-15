@@ -51,6 +51,7 @@ var PIN_WIDTH = 50;
 var PIN_HEIGHT = 70;
 
 var MAP_ELEMENT = document.querySelector('.map');
+var MAP_MAIN_PIN = MAP_ELEMENT.querySelector('.map__pin--main');
 var MAP_PINS_ELEMENT = MAP_ELEMENT.querySelector('.map__pins');
 var MAP_FILTERS_ELEMENT = MAP_ELEMENT.querySelector('.map__filters-container');
 
@@ -62,6 +63,9 @@ var PIN_TEMPLATE = TEMPLATE.querySelector('.map__pin');
 
 // Шаблон объявления
 var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
+
+var FORM = document.querySelector('.notice__form');
+var ADDRESS_INPUT = FORM.querySelector('[name="address"]');
 
 /**
  * Создает массив, состоящий из случайно сгенерированных объектов,
@@ -117,7 +121,7 @@ function generateRandomNotice(options) {
       'checkout': getRandomElement(options.offerCheckOut),
       'features': options.offerFeatures.slice(0, getRandomInt(0, options.offerFeatures.length)), // Получаем массив удобств случайной длины, порядок сохраняется
       'description': '',
-      'photos': shuffleArray(options.offerPhotos)
+      'photos': shuffleArray(options.offerPhotos).slice() // Копируем перемешанный массив
     },
 
     'location': {
@@ -165,7 +169,41 @@ function renderPin(pinData, template, width, height) {
 
   pinElement.querySelector('img').setAttribute('src', pinData.author.avatar);
 
+  pinElement.addEventListener('click', function () {
+    if (pinElement.className.indexOf('map__pin--selected') === -1) {
+      toggleSelectedPin(MAP_PINS_ELEMENT.querySelectorAll('.map__pin'), pinElement);
+      removeCards(MAP_ELEMENT);
+      renderCard(pinData, CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
+    }
+  });
+
   return pinElement;
+}
+
+/**
+ * Добавляет класс --selected выбранной метке
+ * удаляет этот класс с выбранной ранее метки
+ *
+ * @param {array} pins Все метки.
+ * @param {Node} selectedPin Выбранная метка.
+ */
+function toggleSelectedPin(pins, selectedPin) {
+  for (var i = 0; i < pins.length; i++) {
+    pins[i].classList.remove('map__pin--selected');
+  }
+  selectedPin.classList.add('map__pin--selected');
+}
+
+/**
+ * Удаляет ранее отрисованные карточки объявлений.
+ *
+ * @param {Node} map Элемент, в котором находятся карточки.
+ */
+function removeCards(map) {
+  var cards = map.querySelectorAll('.map__card');
+  for (var i = cards.length - 1; i >= 0; i--) {
+    cards[i].remove();
+  }
 }
 
 /**
@@ -212,6 +250,10 @@ function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement
 
   fragment.appendChild(cardElement);
   insertToElement.insertBefore(fragment, insertBeforeElement);
+
+  cardElement.querySelector('.popup__close').addEventListener('click', function () {
+    cardElement.remove();
+  });
 }
 
 /**
@@ -373,6 +415,25 @@ function getOfferTypeName(type) {
   return names[type];
 }
 
+/**
+ * Заполняет поле адреса координатами,
+ * на которые метка указывает своим острым концом.
+ *
+ * @param {Node} input Поле адреса.
+ * @param {Node} pin Метка.
+ * @param {boolean} hasPointer Учитывать ли в расчетах указатель метки.
+ */
+function setAddress(input, pin, hasPointer) {
+  var pinWidth = parseInt(getComputedStyle(pin).width, 10);
+  var pinHeight = parseInt(getComputedStyle(pin).height, 10);
+  var pointerHeight = hasPointer ? parseInt(getComputedStyle(pin, ':after').borderTopWidth, 10) : 0;
+
+  var locationX = pin.offsetLeft + pinWidth / 2;
+  var locationY = pin.offsetTop + pinHeight / 2 + pointerHeight;
+
+  input.value = locationX + ', ' + locationY;
+}
+
 // Генерируем объявления
 var notices = generateNotices(NOTICES_NUM, {
   authorAvatars: AUTHOR_AVATARS,
@@ -394,11 +455,22 @@ var notices = generateNotices(NOTICES_NUM, {
   locationYMax: MAX_Y
 });
 
-// Переключаем карту в активное состояние
-MAP_ELEMENT.classList.remove('map--faded');
+setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, false);
 
-// Отрисовываем метки
-renderPins(notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
+// Переключаем карту и форму в активное состояние
+function mainPinDragHandler() {
+  MAP_ELEMENT.classList.remove('map--faded');
+  renderPins(notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
 
-// Отрисовываем первое объявление
-renderCard(notices[0], CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
+  FORM.classList.remove('notice__form--disabled');
+
+  var fieldsets = FORM.querySelectorAll('fieldset');
+  for (var i = 0; i < fieldsets.length; i++) {
+    fieldsets[i].disabled = false;
+  }
+
+  setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, true);
+}
+
+MAP_MAIN_PIN.addEventListener('mouseup', mainPinDragHandler);
+
