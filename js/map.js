@@ -172,7 +172,7 @@ function renderPin(pinData, template, width, height) {
   pinElement.addEventListener('click', function () {
     if (pinElement.className.indexOf('map__pin--selected') === -1) {
       toggleSelectedPin(MAP_PINS_ELEMENT.querySelectorAll('.map__pin'), pinElement);
-      removeCards(MAP_ELEMENT);
+      cleanNode(MAP_ELEMENT, '.map__card');
       renderCard(pinData, CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
     }
   });
@@ -192,18 +192,6 @@ function toggleSelectedPin(pins, selectedPin) {
     pins[i].classList.remove('map__pin--selected');
   }
   selectedPin.classList.add('map__pin--selected');
-}
-
-/**
- * Удаляет ранее отрисованные карточки объявлений.
- *
- * @param {Node} map Элемент, в котором находятся карточки.
- */
-function removeCards(map) {
-  var cards = map.querySelectorAll('.map__card');
-  for (var i = cards.length - 1; i >= 0; i--) {
-    cards[i].remove();
-  }
 }
 
 /**
@@ -265,7 +253,7 @@ function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement
 function renderCardFeatures(featuresList, featuresListElement) {
   var fragment = document.createDocumentFragment();
 
-  cleanNode(featuresListElement);
+  cleanNode(featuresListElement, null);
 
   for (var i = 0; i < featuresList.length; i++) {
     var featureElement = document.createElement('li');
@@ -285,7 +273,7 @@ function renderCardFeatures(featuresList, featuresListElement) {
 function renderCardPictures(cardPicturesList, picturesListElement) {
   var fragment = document.createDocumentFragment();
 
-  cleanNode(picturesListElement);
+  cleanNode(picturesListElement, null);
 
   for (var i = 0; i < cardPicturesList.length; i++) {
     var pictureElement = document.createElement('img');
@@ -301,9 +289,15 @@ function renderCardPictures(cardPicturesList, picturesListElement) {
  * Удаляет потомков из элемента
  *
  * @param {Node} parent Родительский элемент, который нужно очистить
+ * @param {string} selector Селектор для потомков (не обязательно)
  */
-function cleanNode(parent) {
-  var children = parent.children;
+function cleanNode(parent, selector) {
+  var children = [];
+  if (selector) {
+    children = parent.querySelectorAll(selector);
+  } else {
+    children = parent.children;
+  }
 
   for (var i = children.length - 1; i >= 0; i--) {
     parent.removeChild(children[i]);
@@ -469,8 +463,181 @@ function mainPinDragHandler() {
     fieldsets[i].disabled = false;
   }
 
+  // Нужно чтобы валидация работала правильно,
+  // если пользователь не будет изменять эти поля
   setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, true);
+  setMinPrice(typeSelect.value);
+  checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
 }
 
 MAP_MAIN_PIN.addEventListener('mouseup', mainPinDragHandler);
 
+// Валидация поля ввода заголовка объявления (ТЗ 2.1)
+var titleInput = FORM.querySelector('[name="title"]');
+
+titleInput.addEventListener('invalid', function () {
+  if (titleInput.validity.tooShort) {
+    titleInput.setCustomValidity('Заголовок объявления должен состоять минимум из 30 символов');
+  } else if (titleInput.validity.tooLong) {
+    titleInput.setCustomValidity('Заголовок объявления не должен превышать 100 символов');
+  } else if (titleInput.validity.valueMissing) {
+    titleInput.setCustomValidity('Обязательное поле');
+  } else {
+    titleInput.setCustomValidity('');
+  }
+});
+
+// Фикс для Edge (не поддерживает атрибут minlength)
+titleInput.addEventListener('input', function (evt) {
+  var target = evt.target;
+  if (target.value.length < 30) {
+    target.setCustomValidity('Заголовок объявления должен состоять минимум из 30 символов');
+  } else {
+    target.setCustomValidity('');
+  }
+});
+
+/**
+ * ТЗ 2.3. Поле «Тип жилья» влияет на минимальное значение поля «Цена за ночь»:
+ *
+ * «Лачуга» — минимальная цена за ночь 0;
+ * «Квартира» — минимальная цена за ночь 1 000;
+ * «Дом» — минимальная цена 5 000;
+ * «Дворец» — минимальная цена 10 000.
+ */
+var typeSelect = FORM.querySelector('[name="type"]');
+
+typeSelect.addEventListener('change', function (evt) {
+  setMinPrice(evt.target.value);
+});
+
+function setMinPrice(propertyType) {
+  var minPrices = {
+    'flat': 1000,
+    'house': 5000,
+    'palace': 10000
+  };
+  priceInput.setAttribute('min', minPrices[propertyType] || 0);
+}
+
+// ТЗ 2.2, 2.3. Валидация поля ввода цены
+var priceInput = FORM.querySelector('[name="price"]');
+
+priceInput.addEventListener('invalid', function () {
+  if (priceInput.validity.rangeOverflow) {
+    var maxPrice = priceInput.getAttribute('max') || '1 000 000';
+    priceInput.setCustomValidity('Цена не должна превышать ' + maxPrice + ' руб.');
+  } else if (priceInput.validity.rangeUnderflow) {
+    var minPrice = priceInput.getAttribute('min') || '0';
+    priceInput.setCustomValidity('Для этого типа жилья цена не должна быть ниже ' + minPrice + ' руб.');
+  } else if (priceInput.validity.valueMissing) {
+    priceInput.setCustomValidity('Обязательное поле');
+  } else {
+    priceInput.setCustomValidity('');
+  }
+});
+
+/**
+ * Т3 2.5. Поля «Время заезда» и «Время выезда» синхронизированы:
+ * при изменении значения одного поля, во втором выделяется соответствующее ему.
+ * Например, если время заезда указано «после 14»,
+ * то время выезда будет равно «до 14» и наоборот.
+ */
+var timeinSelect = FORM.querySelector('[name="timein"]');
+var timeoutSelect = FORM.querySelector('[name="timeout"]');
+
+timeinSelect.addEventListener('change', function () {
+  syncFields(timeinSelect, timeoutSelect);
+});
+
+timeoutSelect.addEventListener('change', function () {
+  syncFields(timeoutSelect, timeinSelect);
+});
+
+/**
+ * Синхронизирует значения селектов.
+ * Второму селекту ставит такое же значение, как в первом.
+ *
+ * @param {Node} select1 Первый селект.
+ * @param {Node} select2 Второй селект.
+ */
+function syncFields(select1, select2) {
+  var value1 = select1.value;
+  var options = select2.options;
+  for (var i = 0; i < options.length; i++) {
+    if (options[i].value === value1) {
+      select2.selectedIndex = i;
+    }
+  }
+}
+
+/**
+ * ТЗ 2.6. Поле «Количество комнат» синхронизировано с полем «Количество гостей»,
+ * таким образом, что при выборе количества комнат
+ * вводятся ограничения на допустимые варианты выбора количества гостей:
+ * 1 комната — «для 1 гостя»;
+ * 2 комнаты — «для 2 гостей» или «для 1 гостя»;
+ * 3 комнаты — «для 3 гостей», «для 2 гостей» или «для 1 гостя»;
+ * 100 комнат — «не для гостей».
+ */
+var roomsSelect = FORM.querySelector('[name="rooms"]');
+var capacitySelect = FORM.querySelector('[name="capacity"]');
+var rulesRoomsCapacity = {
+  '1': ['1'],
+  '2': ['1', '2'],
+  '3': ['1', '2', '3'],
+  '100': ['0']
+};
+
+function checkRoomsCapacity(rooms, capacity, rules) {
+  var allowedCapacity = rules[rooms.value];
+
+  // Ограничиваем возможность выбора неправильных вариантов
+  for (var i = 0; i < capacity.options.length; i++) {
+    if (allowedCapacity.indexOf(capacity.options[i].value) === -1) {
+      capacity.options[i].disabled = true;
+    } else {
+      capacity.options[i].disabled = false;
+    }
+  }
+
+  // Добавляем / убираем сообщение об ошибке
+  if (allowedCapacity.indexOf(capacity.value) === -1) {
+    capacity.setCustomValidity('Выберите другое количество мест');
+  } else {
+    capacity.setCustomValidity('');
+  }
+}
+
+roomsSelect.addEventListener('change', function () {
+  checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
+});
+
+capacitySelect.addEventListener('change', function () {
+  checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
+});
+
+// ТЗ 1.7. Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
+var formReset = FORM.querySelector('.form__reset');
+
+formReset.addEventListener('click', function (evt) {
+  evt.preventDefault();
+
+  // Все заполненные поля стираются
+  FORM.reset();
+
+  // Метки похожих объявлений и карточка активного объявления удаляются
+  cleanNode(MAP_ELEMENT, '.map__card');
+  cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
+
+  // Карта и форма переходят в неактивное состояние
+  MAP_ELEMENT.classList.add('map--faded');
+  FORM.classList.add('notice__form--disabled');
+
+  // Метка адреса возвращается в исходное положение
+  MAP_MAIN_PIN.style.top = '';
+  MAP_MAIN_PIN.style.left = '';
+
+  // Значение поля адреса корректируется соответственно положению метки
+  setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, false);
+});
