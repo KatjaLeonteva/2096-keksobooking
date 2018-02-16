@@ -3,11 +3,14 @@
 'use strict';
 
 (function () {
-  var FORM = document.querySelector('.notice__form');
-  var addressInput = FORM.querySelector('[name="address"]');
+  var form = document.querySelector('.notice__form');
+  var addressInput = form.querySelector('[name="address"]');
+
+  // Заполняем поле адреса после открытия страницы
+  addressInput.value = window.map.getMainPinLocation(false);
 
   // Валидация поля ввода заголовка объявления (ТЗ 2.1)
-  var titleInput = FORM.querySelector('[name="title"]');
+  var titleInput = form.querySelector('[name="title"]');
 
   titleInput.addEventListener('invalid', function () {
     if (titleInput.validity.tooShort) {
@@ -39,7 +42,7 @@
    * «Дом» — минимальная цена 5 000;
    * «Дворец» — минимальная цена 10 000.
    */
-  var typeSelect = FORM.querySelector('[name="type"]');
+  var typeSelect = form.querySelector('[name="type"]');
 
   typeSelect.addEventListener('change', function (evt) {
     setMinPrice(evt.target.value);
@@ -55,7 +58,7 @@
   }
 
   // ТЗ 2.2, 2.3. Валидация поля ввода цены
-  var priceInput = FORM.querySelector('[name="price"]');
+  var priceInput = form.querySelector('[name="price"]');
 
   priceInput.addEventListener('invalid', function () {
     if (priceInput.validity.rangeOverflow) {
@@ -77,8 +80,8 @@
    * Например, если время заезда указано «после 14»,
    * то время выезда будет равно «до 14» и наоборот.
    */
-  var timeinSelect = FORM.querySelector('[name="timein"]');
-  var timeoutSelect = FORM.querySelector('[name="timeout"]');
+  var timeinSelect = form.querySelector('[name="timein"]');
+  var timeoutSelect = form.querySelector('[name="timeout"]');
 
   timeinSelect.addEventListener('change', function () {
     syncFields(timeinSelect, timeoutSelect);
@@ -114,8 +117,8 @@
    * 3 комнаты — «для 3 гостей», «для 2 гостей» или «для 1 гостя»;
    * 100 комнат — «не для гостей».
    */
-  var roomsSelect = FORM.querySelector('[name="rooms"]');
-  var capacitySelect = FORM.querySelector('[name="capacity"]');
+  var roomsSelect = form.querySelector('[name="rooms"]');
+  var capacitySelect = form.querySelector('[name="capacity"]');
   var rulesRoomsCapacity = {
     '1': ['1'],
     '2': ['1', '2'],
@@ -151,4 +154,34 @@
     checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
   });
 
+  /*
+  // ТЗ 1.7. Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
+  var formReset = FORM.querySelector('.form__reset');
+
+  formReset.addEventListener('click', function (evt) {
+    evt.preventDefault();
+
+    // Все заполненные поля стираются
+    FORM.reset();
+
+    // Метки похожих объявлений и карточка активного объявления удаляются
+    cleanNode(MAP_ELEMENT, '.map__card');
+    cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
+
+    // Карта и форма переходят в неактивное состояние
+    MAP_ELEMENT.classList.add('map--faded');
+    FORM.classList.add('notice__form--disabled');
+
+    // Метка адреса возвращается в исходное положение
+    MAP_MAIN_PIN.style.top = '';
+    MAP_MAIN_PIN.style.left = '';
+
+    // Значение поля адреса корректируется соответственно положению метки
+    setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, false);
+  });
+  */
+
+  window.form = {
+
+  };
 })();

@@ -63,7 +63,7 @@
     var noticesData = [];
 
     // Копируем массивы, чтобы не менять исходные константы
-    noticesOptions.authorAvatars = noticesOptions.authorAvatars.slice();;
+    noticesOptions.authorAvatars = noticesOptions.authorAvatars.slice();
     noticesOptions.offerTitles = noticesOptions.offerTitles.slice();
     noticesOptions.offerPhotos = noticesOptions.offerPhotos.slice();
 
@@ -223,5 +223,5 @@
     locationYMax: MAX_Y
   });
 
-  window.data = notices;
+  window.notices = notices;
 })();
