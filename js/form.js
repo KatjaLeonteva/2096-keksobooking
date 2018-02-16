@@ -154,34 +154,32 @@
     checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
   });
 
-  /*
   // ТЗ 1.7. Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
-  var formReset = FORM.querySelector('.form__reset');
+  var formReset = form.querySelector('.form__reset');
 
   formReset.addEventListener('click', function (evt) {
     evt.preventDefault();
 
-    // Все заполненные поля стираются
-    FORM.reset();
+    form.reset();
+    form.classList.add('notice__form--disabled');
+    addressInput.value = window.map.getMainPinLocation(false);
 
-    // Метки похожих объявлений и карточка активного объявления удаляются
-    cleanNode(MAP_ELEMENT, '.map__card');
-    cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
-
-    // Карта и форма переходят в неактивное состояние
-    MAP_ELEMENT.classList.add('map--faded');
-    FORM.classList.add('notice__form--disabled');
-
-    // Метка адреса возвращается в исходное положение
-    MAP_MAIN_PIN.style.top = '';
-    MAP_MAIN_PIN.style.left = '';
-
-    // Значение поля адреса корректируется соответственно положению метки
-    setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, false);
+    window.map.deactivateMap();
   });
-  */
 
-  window.form = {
 
+  window.activateForm = function () {
+    form.classList.remove('notice__form--disabled');
+
+    var fieldsets = form.querySelectorAll('fieldset');
+    for (var i = 0; i < fieldsets.length; i++) {
+      fieldsets[i].disabled = false;
+    }
+
+    // Это нужно, чтобы валидация работала правильно,
+    // если пользователь не будет изменять эти поля
+    addressInput.value = window.map.getMainPinLocation(true);
+    setMinPrice(typeSelect.value);
+    checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
   };
 })();

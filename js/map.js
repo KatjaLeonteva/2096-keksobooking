@@ -22,20 +22,16 @@
     MAP_ELEMENT.classList.remove('map--faded');
     renderPins(window.notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
 
-    /*
-    FORM.classList.remove('notice__form--disabled');
+    window.activateForm();
+  }
 
-    var fieldsets = FORM.querySelectorAll('fieldset');
-    for (var i = 0; i < fieldsets.length; i++) {
-      fieldsets[i].disabled = false;
-    }
+  function deactivateMap() {
+    window.utils.cleanNode(MAP_ELEMENT, '.map__card');
+    window.utils.cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
+    MAP_ELEMENT.classList.add('map--faded');
 
-    // Нужно чтобы валидация работала правильно,
-    // если пользователь не будет изменять эти поля
-    setAddress(ADDRESS_INPUT, MAP_MAIN_PIN, true);
-    setMinPrice(typeSelect.value);
-    checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
-    */
+    MAP_MAIN_PIN.style.top = '';
+    MAP_MAIN_PIN.style.left = '';
   }
 
   MAP_MAIN_PIN.addEventListener('mouseup', mainPinDragHandler);
@@ -108,7 +104,7 @@
   }
 
   window.map = {
-    getMainPinLocation: getMainPinLocation
+    getMainPinLocation: getMainPinLocation,
+    deactivateMap: deactivateMap
   };
-
 })();
