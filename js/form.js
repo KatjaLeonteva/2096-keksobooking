@@ -60,18 +60,25 @@
   // ТЗ 2.2, 2.3. Валидация поля ввода цены
   var priceInput = form.querySelector('[name="price"]');
 
-  priceInput.addEventListener('invalid', function () {
-    if (priceInput.validity.rangeOverflow) {
-      var maxPrice = priceInput.getAttribute('max') || '1 000 000';
-      priceInput.setCustomValidity('Цена не должна превышать ' + maxPrice + ' руб.');
-    } else if (priceInput.validity.rangeUnderflow) {
-      var minPrice = priceInput.getAttribute('min') || '0';
-      priceInput.setCustomValidity('Для этого типа жилья цена не должна быть ниже ' + minPrice + ' руб.');
-    } else if (priceInput.validity.valueMissing) {
-      priceInput.setCustomValidity('Обязательное поле');
+  priceInput.addEventListener('invalid', function (evt) {
+    if (evt.target.validity.rangeOverflow) {
+      var maxPrice = evt.target.getAttribute('max') || '1 000 000';
+      evt.target.setCustomValidity('Цена не должна превышать ' + maxPrice + ' руб.');
+
+    } else if (evt.target.validity.rangeUnderflow) {
+      var minPrice = evt.target.getAttribute('min') || '0';
+      evt.target.setCustomValidity('Для этого типа жилья цена не должна быть ниже ' + minPrice + ' руб.');
+
+    } else if (evt.target.validity.valueMissing) {
+      evt.target.setCustomValidity('Обязательное поле');
+
     } else {
-      priceInput.setCustomValidity('');
+      evt.target.setCustomValidity('');
     }
+  });
+
+  priceInput.addEventListener('change', function (evt) {
+    evt.target.setCustomValidity('');
   });
 
   /**
