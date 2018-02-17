@@ -17,8 +17,8 @@
   function renderPin(pinData, template, width, height, clickHandler) {
     var pinElement = template.cloneNode(true);
 
-    pinElement.style.left = (pinData.location.x - width / 2) + 'px';
-    pinElement.style.top = (pinData.location.y - height) + 'px';
+    pinElement.style.left = (pinData.location.x) + 'px';
+    pinElement.style.top = (pinData.location.y - height / 2) + 'px';
 
     pinElement.querySelector('img').setAttribute('src', pinData.author.avatar);
 
