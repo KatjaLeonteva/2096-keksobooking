@@ -73,6 +73,12 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 
+  function activateMap() {
+    MAP_ELEMENT.classList.remove('map--faded');
+    renderPins(window.notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
+    window.form.activateForm();
+  }
+
   function deactivateMap() {
     window.utils.cleanNode(MAP_ELEMENT, '.map__card');
     window.utils.cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
@@ -80,13 +86,7 @@
 
     MAP_MAIN_PIN.style.top = '';
     MAP_MAIN_PIN.style.left = '';
-  };
-
-  function activateMap() {
-    MAP_ELEMENT.classList.remove('map--faded');
-    renderPins(window.notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
-    window.form.activateForm();
-  };
+  }
 
   /**
    * Вставляет метки в DOM
