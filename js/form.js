@@ -170,8 +170,11 @@
 
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
-    window.backend.save(new FormData(form), deactivateForm, function (errorMessage) {
-      console.log(errorMessage);
+    window.backend.save(new FormData(form), function () {
+      window.message('Данные отправлены успешно!');
+      deactivateForm();
+    }, function (errorMessage) {
+      window.message(errorMessage);
     });
   });
 

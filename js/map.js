@@ -80,7 +80,7 @@
     window.backend.load(function (response) {
       renderPins(response, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
     }, function (errorMessage) {
-      console.log(errorMessage);
+      window.message(errorMessage);
     });
   }
 
