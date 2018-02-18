@@ -126,7 +126,9 @@
     window.utils.cleanNode(MAP_ELEMENT, '.map__card');
 
     // Отрисовывает карточку для выбранной метки
-    window.renderCard(selectedPinData, CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
+    window.renderCard(selectedPinData, CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT, function () {
+      selectedPinElement.classList.remove('map__pin--selected');
+    });
   }
 
   /**

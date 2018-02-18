@@ -11,7 +11,7 @@
    * @param {Node} insertToElement Элемент, в который вставляется карточка.
    * @param {Node} insertBeforeElement Элемент, перед которым вставляется карточка.
    */
-  function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement) {
+  function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement, clickHandler) {
     var cardElement = cardTemplate.cloneNode(true);
 
     var cardAvatar = cardElement.querySelector('.popup__avatar');
@@ -48,6 +48,7 @@
 
     cardElement.querySelector('.popup__close').addEventListener('click', function () {
       cardElement.remove();
+      clickHandler();
     });
   }
 
