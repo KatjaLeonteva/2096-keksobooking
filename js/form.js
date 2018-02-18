@@ -165,13 +165,14 @@
 
   formReset.addEventListener('click', function (evt) {
     evt.preventDefault();
+    deactivateForm();
+  });
 
-    form.reset();
-    form.classList.add('notice__form--disabled');
-
-    window.map.deactivateMap();
-
-    updateAddress(false);
+  form.addEventListener('submit', function (evt) {
+    evt.preventDefault();
+    window.backend.save(new FormData(form), deactivateForm, function (errorMessage) {
+      console.log(errorMessage);
+    });
   });
 
   function activateForm() {
@@ -187,6 +188,15 @@
     updateAddress(true);
     setMinPrice(typeSelect.value);
     checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
+  }
+
+  function deactivateForm() {
+    form.reset();
+    form.classList.add('notice__form--disabled');
+
+    window.map.deactivateMap();
+
+    updateAddress(false);
   }
 
   function updateAddress(isActiveMap) {
