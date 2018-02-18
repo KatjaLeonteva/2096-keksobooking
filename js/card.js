@@ -99,10 +99,13 @@
     window.utils.cleanNode(picturesListElement, null);
 
     for (var i = 0; i < cardPicturesList.length; i++) {
+      var pictureListItem = document.createElement('li');
       var pictureElement = document.createElement('img');
       pictureElement.setAttribute('src', cardPicturesList[i]);
-      pictureElement.width = 210;
-      fragment.appendChild(pictureElement);
+      pictureElement.height = 40;
+      pictureElement.style.marginRight = '5px';
+      pictureListItem.appendChild(pictureElement);
+      fragment.appendChild(pictureListItem);
     }
 
     picturesListElement.appendChild(fragment);

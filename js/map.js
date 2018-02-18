@@ -75,8 +75,13 @@
 
   function activateMap() {
     MAP_ELEMENT.classList.remove('map--faded');
-    renderPins(window.notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
     window.form.activateForm();
+
+    window.backend.load(function (response) {
+      renderPins(response, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
+    }, function (errorMessage) {
+      console.log(errorMessage);
+    });
   }
 
   function deactivateMap() {
