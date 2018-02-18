@@ -10,6 +10,7 @@
    * @param {Node} cardTemplate Шаблон карточки объявления.
    * @param {Node} insertToElement Элемент, в который вставляется карточка.
    * @param {Node} insertBeforeElement Элемент, перед которым вставляется карточка.
+   * @param {function} clickHandler Колбэк по закрытию карточки.
    */
   function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement, clickHandler) {
     var cardElement = cardTemplate.cloneNode(true);
