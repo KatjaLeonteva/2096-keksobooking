@@ -75,8 +75,13 @@
 
   function activateMap() {
     MAP_ELEMENT.classList.remove('map--faded');
-    renderPins(window.notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
     window.form.activateForm();
+
+    window.backend.load(function (response) {
+      renderPins(response, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
+    }, function (errorMessage) {
+      window.message(errorMessage);
+    });
   }
 
   function deactivateMap() {
@@ -121,7 +126,9 @@
     window.utils.cleanNode(MAP_ELEMENT, '.map__card');
 
     // Отрисовывает карточку для выбранной метки
-    window.renderCard(selectedPinData, CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT);
+    window.renderCard(selectedPinData, CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT, function () {
+      selectedPinElement.classList.remove('map__pin--selected');
+    });
   }
 
   /**

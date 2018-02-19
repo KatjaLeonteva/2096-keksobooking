@@ -10,8 +10,9 @@
    * @param {Node} cardTemplate Шаблон карточки объявления.
    * @param {Node} insertToElement Элемент, в который вставляется карточка.
    * @param {Node} insertBeforeElement Элемент, перед которым вставляется карточка.
+   * @param {function} clickHandler Колбэк по закрытию карточки.
    */
-  function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement) {
+  function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement, clickHandler) {
     var cardElement = cardTemplate.cloneNode(true);
 
     var cardAvatar = cardElement.querySelector('.popup__avatar');
@@ -48,6 +49,7 @@
 
     cardElement.querySelector('.popup__close').addEventListener('click', function () {
       cardElement.remove();
+      clickHandler();
     });
   }
 
@@ -99,10 +101,13 @@
     window.utils.cleanNode(picturesListElement, null);
 
     for (var i = 0; i < cardPicturesList.length; i++) {
+      var pictureListItem = document.createElement('li');
       var pictureElement = document.createElement('img');
       pictureElement.setAttribute('src', cardPicturesList[i]);
-      pictureElement.width = 210;
-      fragment.appendChild(pictureElement);
+      pictureElement.height = 40;
+      pictureElement.style.marginRight = '5px';
+      pictureListItem.appendChild(pictureElement);
+      fragment.appendChild(pictureListItem);
     }
 
     picturesListElement.appendChild(fragment);
