@@ -4,10 +4,9 @@
 
 (function () {
   var form = document.querySelector('.notice__form');
-  var addressInput = form.querySelector('[name="address"]');
 
   // Заполняем поле адреса после открытия страницы
-  addressInput.value = window.map.getMainPinLocation(false);
+  updateAddress(false);
 
   // Валидация поля ввода заголовка объявления (ТЗ 2.1)
   var titleInput = form.querySelector('[name="title"]');
@@ -169,13 +168,13 @@
 
     form.reset();
     form.classList.add('notice__form--disabled');
-    addressInput.value = window.map.getMainPinLocation(false);
 
     window.map.deactivateMap();
+
+    updateAddress(false);
   });
 
-
-  window.activateForm = function () {
+  function activateForm() {
     form.classList.remove('notice__form--disabled');
 
     var fieldsets = form.querySelectorAll('fieldset');
@@ -185,8 +184,18 @@
 
     // Это нужно, чтобы валидация работала правильно,
     // если пользователь не будет изменять эти поля
-    addressInput.value = window.map.getMainPinLocation(true);
+    updateAddress(true);
     setMinPrice(typeSelect.value);
     checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
+  }
+
+  function updateAddress(isActiveMap) {
+    var addressInput = form.querySelector('[name="address"]');
+    addressInput.value = window.map.getMainPinLocation(isActiveMap);
+  }
+
+  window.form = {
+    activateForm: activateForm,
+    updateAddress: updateAddress
   };
 })();

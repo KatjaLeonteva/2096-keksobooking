@@ -14,15 +14,69 @@
   var PIN_TEMPLATE = TEMPLATE.querySelector('.map__pin');
   var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
 
+  var MAIN_PIN_CORRECTION = 48;
   var PIN_WIDTH = 50;
   var PIN_HEIGHT = 70;
 
-  // Переключаем карту и форму в активное состояние
-  function mainPinDragHandler() {
+  // Перетаскивание главной метки
+  MAP_MAIN_PIN.addEventListener('mousedown', function (evt) {
+    evt.preventDefault();
+
+    var isActive = (MAP_ELEMENT.className.indexOf('map--faded') === -1);
+
+    var startCoords = {
+      x: evt.clientX,
+      y: evt.clientY
+    };
+
+    var limitCoords = {
+      minX: 0,
+      maxX: MAP_ELEMENT.offsetWidth,
+      minY: 150 - MAIN_PIN_CORRECTION, // Линия горизонта (ТЗ 3.4)
+      maxY: MAP_FILTERS_ELEMENT.offsetTop - MAIN_PIN_CORRECTION // Ограничение по ТЗ 3.4
+    };
+
+    var onMouseMove = function (moveEvt) {
+      moveEvt.preventDefault();
+
+      var shift = {
+        x: startCoords.x - moveEvt.clientX,
+        y: startCoords.y - moveEvt.clientY
+      };
+
+      startCoords = {
+        x: moveEvt.clientX,
+        y: moveEvt.clientY
+      };
+
+      var pinX = Math.min(Math.max((MAP_MAIN_PIN.offsetLeft - shift.x), limitCoords.minX), limitCoords.maxX);
+      var pinY = Math.min(Math.max((MAP_MAIN_PIN.offsetTop - shift.y), limitCoords.minY), limitCoords.maxY);
+
+      MAP_MAIN_PIN.style.left = pinX + 'px';
+      MAP_MAIN_PIN.style.top = pinY + 'px';
+
+      window.form.updateAddress(isActive);
+    };
+
+    var onMouseUp = function (upEvt) {
+      upEvt.preventDefault();
+
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+
+      if (!isActive) {
+        activateMap();
+      }
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  });
+
+  function activateMap() {
     MAP_ELEMENT.classList.remove('map--faded');
     renderPins(window.notices, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
-
-    window.activateForm();
+    window.form.activateForm();
   }
 
   function deactivateMap() {
@@ -33,8 +87,6 @@
     MAP_MAIN_PIN.style.top = '';
     MAP_MAIN_PIN.style.left = '';
   }
-
-  MAP_MAIN_PIN.addEventListener('mouseup', mainPinDragHandler);
 
   /**
    * Вставляет метки в DOM
@@ -89,22 +141,20 @@
   /**
    * Возвращает положение главной метки на карте
    *
-   * @param {boolean} hasPointer Учитывать ли в расчетах указатель метки.
+   * @param {boolean} isActive Если карта активная, то делаем поправку на указатель
    * @return {string} Адрес  в формате {{x}}, {{y}}
    */
-  function getMainPinLocation(hasPointer) {
-    var pinWidth = parseInt(getComputedStyle(MAP_MAIN_PIN).width, 10);
-    var pinHeight = parseInt(getComputedStyle(MAP_MAIN_PIN).height, 10);
-    var pointerHeight = hasPointer ? parseInt(getComputedStyle(MAP_MAIN_PIN, ':after').borderTopWidth, 10) : 0;
+  function getMainPinLocation(isActive) {
+    var pinCorrection = isActive ? MAIN_PIN_CORRECTION : 0;
 
-    var locationX = MAP_MAIN_PIN.offsetLeft + pinWidth / 2;
-    var locationY = MAP_MAIN_PIN.offsetTop + pinHeight / 2 + pointerHeight;
+    var locationX = MAP_MAIN_PIN.offsetLeft;
+    var locationY = MAP_MAIN_PIN.offsetTop + pinCorrection;
 
     return (locationX + ', ' + locationY);
   }
 
   window.map = {
-    getMainPinLocation: getMainPinLocation,
-    deactivateMap: deactivateMap
+    deactivateMap: deactivateMap,
+    getMainPinLocation: getMainPinLocation
   };
 })();
