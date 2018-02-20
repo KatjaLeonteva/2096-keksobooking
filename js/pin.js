@@ -23,7 +23,7 @@
     pinElement.querySelector('img').setAttribute('src', pinData.author.avatar);
 
     pinElement.addEventListener('click', function () {
-      if (pinElement.className.indexOf('map__pin--selected') === -1) {
+      if (!pinElement.classList.contains('map__pin--selected')) {
         clickHandler(pinElement, pinData);
       }
     });

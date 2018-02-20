@@ -22,7 +22,7 @@
   MAP_MAIN_PIN.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
 
-    var isActive = (MAP_ELEMENT.className.indexOf('map--faded') === -1);
+    var isActive = !(MAP_ELEMENT.classList.contains('map--faded'));
 
     var startCoords = {
       x: evt.clientX,
