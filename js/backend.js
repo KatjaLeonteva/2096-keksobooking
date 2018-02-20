@@ -6,6 +6,7 @@
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
     xhr.timeout = 10000; // 10s
+    xhr.setRequestHeader('Cache-Control', 'no-cache');
 
     xhr.addEventListener('load', function () {
       if (xhr.status === 200) {
@@ -30,6 +31,7 @@
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
     xhr.timeout = 10000; // 10s
+    xhr.setRequestHeader('Cache-Control', 'no-cache');
 
     xhr.addEventListener('load', function () {
       if (xhr.status === 200) {
