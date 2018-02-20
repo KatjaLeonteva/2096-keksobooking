@@ -22,7 +22,7 @@
       onError('Запрос не успел выполниться за ' + xhr.timeout + 'мс');
     });
 
-    xhr.open('GET', 'https://js.dump.academy/keksobooking/data');
+    xhr.open('GET', 'https://js.dump.academy/keksobooking/data1');
     xhr.send();
   };
 

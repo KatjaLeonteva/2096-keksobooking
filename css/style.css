@@ -855,7 +855,18 @@ textarea:focus
     background-position: -10px -10px;
 }
 
-.message {
+.message__overlay {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: auto;
+  background: rgba(0, 0, 0, .6);
+}
+
+.message__popup {
   position: fixed;
   z-index: 100;
   width: 230px;
