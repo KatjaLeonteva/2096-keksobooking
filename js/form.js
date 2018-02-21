@@ -163,6 +163,12 @@
     checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
   });
 
+  var avatarInput = form.querySelector('#avatar');
+  var avatarPreview = form.querySelector('.notice__preview img');
+  avatarInput.addEventListener('change', function (evt) {
+    avatarPreview.setAttribute('src', URL.createObjectURL(evt.target.files[0]));
+  });
+
   // ТЗ 1.7. Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
   var formReset = form.querySelector('.form__reset');
 
