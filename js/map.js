@@ -18,8 +18,11 @@
   var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
 
   var MAIN_PIN_CORRECTION = 48;
+  var PINS_NUM = 5;
   var PIN_WIDTH = 50;
   var PIN_HEIGHT = 70;
+
+  var hotels = [];
 
   // Перетаскивание главной метки
   MAP_MAIN_PIN.addEventListener('mousedown', function (evt) {
@@ -63,6 +66,7 @@
       MAP_MAIN_PIN.style.top = pinY + 'px';
 
       window.form.updateAddress(isActive);
+      window.debounce(renderPins);
     };
 
     var onMouseUp = function (upEvt) {
@@ -85,38 +89,49 @@
     window.form.activateForm();
 
     window.backend.load(function (response) {
-      renderPins(response, MAP_PINS_ELEMENT, PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT);
+      hotels = response;
+      renderPins();
     }, function (errorMessage) {
       window.message(errorMessage);
     });
   }
 
   function deactivateMap() {
-    window.utils.cleanNode(MAP_ELEMENT, '.map__card');
-    window.utils.cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
+    cleanMap();
     MAP_ELEMENT.classList.add('map--faded');
 
     MAP_MAIN_PIN.style.top = '';
     MAP_MAIN_PIN.style.left = '';
   }
 
-  /**
-   * Вставляет метки в DOM
-   *
-   * @param {array} pinsData Массив с данными для меток.
-   * @param {Node} pinsElement Элемент, куда вставляются метки.
-   * @param {Node} pinTemplate Шаблон метки.
-   * @param {number} pinWidth Ширина метки.
-   * @param {number} pinHeight Высота метки.
-   */
-  function renderPins(pinsData, pinsElement, pinTemplate, pinWidth, pinHeight) {
+  function cleanMap() {
+    window.utils.cleanNode(MAP_ELEMENT, '.map__card');
+    window.utils.cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
+  }
+
+  function renderPins() {
+    cleanMap();
+
+    var sortedHotels = hotels.slice().sort(compareDistance);
+
     var fragment = document.createDocumentFragment();
 
-    for (var i = 0; i < pinsData.length; i++) {
-      fragment.appendChild(window.renderPin(pinsData[i], pinTemplate, pinWidth, pinHeight, pinClickHandler));
+    for (var i = 0; i < PINS_NUM; i++) {
+      fragment.appendChild(window.renderPin(sortedHotels[i], PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT, pinClickHandler));
     }
 
-    pinsElement.appendChild(fragment);
+    MAP_PINS_ELEMENT.appendChild(fragment);
+  }
+
+  function compareDistance(a, b) {
+    var dxA = (a.location.x - getMainPinLocation().x);
+    var dyA = (a.location.y - getMainPinLocation().y);
+    var dxB = (b.location.x - getMainPinLocation().x);
+    var dyB = (b.location.y - getMainPinLocation().y);
+    var distanceA = Math.sqrt(Math.pow(dxA, 2) + Math.pow(dyA, 2));
+    var distanceB = Math.sqrt(Math.pow(dxB, 2) + Math.pow(dyB, 2));
+
+    return distanceA - distanceB;
   }
 
   /**
@@ -156,7 +171,7 @@
    * Возвращает положение главной метки на карте
    *
    * @param {boolean} isActive Если карта активная, то делаем поправку на указатель
-   * @return {string} Адрес  в формате {{x}}, {{y}}
+   * @return {object} Координаты главной метки
    */
   function getMainPinLocation(isActive) {
     var pinCorrection = isActive ? MAIN_PIN_CORRECTION : 0;
@@ -164,7 +179,7 @@
     var locationX = MAP_MAIN_PIN.offsetLeft;
     var locationY = MAP_MAIN_PIN.offsetTop + pinCorrection;
 
-    return (locationX + ', ' + locationY);
+    return {x: locationX, y: locationY};
   }
 
   window.map = {
