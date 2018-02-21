@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Сообщение в модальном окне
+ * @author Екатерина Леонтьева
+ */
+
 'use strict';
 
 (function () {

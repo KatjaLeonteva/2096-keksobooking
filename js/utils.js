@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Вспомогательные методы
+ * @author Екатерина Леонтьева
+ */
+
 'use strict';
 
 (function () {

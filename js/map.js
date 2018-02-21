@@ -1,6 +1,9 @@
-// Модуль, который управляет карточками объявлений и пинами:
-// добавляет на страницу нужную карточку, отрисовывает пины
-// и осуществляет взаимодействие карточки и метки на карте.
+/**
+ * @fileoverview Модуль, который управляет карточками объявлений и пинами:
+ * добавляет на страницу нужную карточку, отрисовывает пины
+ * и осуществляет взаимодействие карточки и метки на карте.
+ * @author Екатерина Леонтьева
+ */
 
 'use strict';
 
@@ -29,11 +32,15 @@
       y: evt.clientY
     };
 
+    /**
+     * Координаты, ограничивающие перемещение маркера
+     * @enum {number}
+     */
     var limitCoords = {
-      minX: 0,
-      maxX: MAP_ELEMENT.offsetWidth,
-      minY: 150 - MAIN_PIN_CORRECTION, // Линия горизонта (ТЗ 3.4)
-      maxY: MAP_FILTERS_ELEMENT.offsetTop - MAIN_PIN_CORRECTION // Ограничение по ТЗ 3.4
+      MIN_X: 0,
+      MAX_X: MAP_ELEMENT.offsetWidth,
+      MIN_Y: 150 - MAIN_PIN_CORRECTION, // Линия горизонта (ТЗ 3.4)
+      MAX_Y: MAP_FILTERS_ELEMENT.offsetTop - MAIN_PIN_CORRECTION // Ограничение по ТЗ 3.4
     };
 
     var onMouseMove = function (moveEvt) {
@@ -49,8 +56,8 @@
         y: moveEvt.clientY
       };
 
-      var pinX = Math.min(Math.max((MAP_MAIN_PIN.offsetLeft - shift.x), limitCoords.minX), limitCoords.maxX);
-      var pinY = Math.min(Math.max((MAP_MAIN_PIN.offsetTop - shift.y), limitCoords.minY), limitCoords.maxY);
+      var pinX = Math.min(Math.max((MAP_MAIN_PIN.offsetLeft - shift.x), limitCoords.MIN_X), limitCoords.MAX_X);
+      var pinY = Math.min(Math.max((MAP_MAIN_PIN.offsetTop - shift.y), limitCoords.MIN_Y), limitCoords.MAX_Y);
 
       MAP_MAIN_PIN.style.left = pinX + 'px';
       MAP_MAIN_PIN.style.top = pinY + 'px';
