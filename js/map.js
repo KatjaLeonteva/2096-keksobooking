@@ -37,7 +37,11 @@
   MAP_MAIN_PIN.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
 
+    // Первое перемещение метки переводит страницу в активное состояние
     var isActive = !(MAP_ELEMENT.classList.contains('map--faded'));
+    if (!isActive) {
+      activateMap();
+    }
 
     var startCoords = {
       x: evt.clientX,
@@ -57,11 +61,6 @@
 
     var onMouseMove = function (moveEvt) {
       moveEvt.preventDefault();
-
-      // Первое перемещение метки переводит страницу в активное состояние
-      if (!isActive) {
-        activateMap();
-      }
 
       var shift = {
         x: startCoords.x - moveEvt.clientX,
@@ -95,7 +94,7 @@
   });
 
   // Изменение фильтров
-  MAP_FILTERS.addEventListener('change', function(evt) {
+  MAP_FILTERS.addEventListener('change', function (evt) {
     if (evt.target.type === 'checkbox') {
       filters['housing-features'][evt.target.id] = evt.target.checked;
     } else {
@@ -103,8 +102,6 @@
     }
     window.debounce(renderPins);
   });
-
-  // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
 
   /**
    * Переводит карту в активное состояние
@@ -171,6 +168,7 @@
    * Возвращает расстояние до главной метки
    *
    * @param {node} pin Метка, от которой считаем расстояние
+   * @return {number} Расстояние
    */
   function calculateDistance(pin) {
     var dx = (pin.location.x - getMainPinLocation().x);

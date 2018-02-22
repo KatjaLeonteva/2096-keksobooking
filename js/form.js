@@ -213,7 +213,7 @@
 
   function updateAddress(isActiveMap) {
     var addressInput = form.querySelector('[name="address"]');
-    var mainPinLocation = window.map.getMainPinLocation(isActiveMap)
+    var mainPinLocation = window.map.getMainPinLocation(isActiveMap);
     addressInput.value = 'x: ' + mainPinLocation.x + ', y: ' + mainPinLocation.y;
   }
 

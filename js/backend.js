@@ -28,7 +28,6 @@
     });
 
     xhr.open('GET', 'https://js.dump.academy/keksobooking/data');
-    //xhr.setRequestHeader('Cache-Control', 'no-cache');
     xhr.send();
   };
 
@@ -54,7 +53,6 @@
     });
 
     xhr.open('POST', 'https://js.dump.academy/keksobooking');
-    //xhr.setRequestHeader('Cache-Control', 'no-cache');
     xhr.send(data);
   };
 
