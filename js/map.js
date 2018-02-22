@@ -12,11 +12,26 @@
   var MAP_MAIN_PIN = MAP_ELEMENT.querySelector('.map__pin--main');
   var MAP_PINS_ELEMENT = MAP_ELEMENT.querySelector('.map__pins');
   var MAP_FILTERS_ELEMENT = MAP_ELEMENT.querySelector('.map__filters-container');
+  var MAP_FILTERS = MAP_FILTERS_ELEMENT.querySelector('.map__filters');
 
   var MAIN_PIN_CORRECTION = 48;
   var PINS_NUM = 5;
 
   var hotels = [];
+  var filters = {
+    'housing-type': 'any',
+    'housing-price': 'any',
+    'housing-rooms': 'any',
+    'housing-guests': 'any',
+    'housing-features': {
+      'filter-wifi': false,
+      'filter-dishwasher': false,
+      'filter-parking': false,
+      'filter-washer': false,
+      'filter-elevator': false,
+      'filter-conditioner': false
+    }
+  };
 
   // Перетаскивание главной метки
   MAP_MAIN_PIN.addEventListener('mousedown', function (evt) {
@@ -78,6 +93,22 @@
     document.addEventListener('mouseup', onMouseUp);
   });
 
+  // Изменение фильтров
+  MAP_FILTERS.addEventListener('change', function(evt) {
+    if (evt.target.type === 'checkbox') {
+      filters['housing-features'][evt.target.id] = evt.target.checked;
+    } else {
+      filters[evt.target.id] = evt.target.value;
+    }
+    window.debounce(renderPins);
+  });
+
+  // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ
+
+  /**
+   * Переводит карту в активное состояние
+   *
+   */
   function activateMap() {
     MAP_ELEMENT.classList.remove('map--faded');
     window.form.activateForm();
@@ -90,6 +121,10 @@
     });
   }
 
+  /**
+   * Переводит карту в неактивное состояние
+   *
+   */
   function deactivateMap() {
     cleanMap();
     MAP_ELEMENT.classList.add('map--faded');
@@ -98,15 +133,29 @@
     MAP_MAIN_PIN.style.left = '';
   }
 
+  /**
+   * Удаляет элементы из карты
+   *
+   */
   function cleanMap() {
     window.utils.cleanNode(MAP_ELEMENT, '.map__card');
     window.utils.cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
   }
 
+  /**
+   * Отрисовывает метки на карте
+   *
+   */
   function renderPins() {
     cleanMap();
 
-    var sortedHotels = hotels.slice().sort(compareDistance);
+    var sortedHotels = hotels.slice().sort(function (left, right) {
+      var diff = getRank(right) - getRank(left);
+      if (diff === 0) {
+        diff = calculateDistance(left) - calculateDistance(right);
+      }
+      return diff;
+    });
 
     var fragment = document.createDocumentFragment();
 
@@ -117,15 +166,16 @@
     MAP_PINS_ELEMENT.appendChild(fragment);
   }
 
-  function compareDistance(a, b) {
-    var dxA = (a.location.x - getMainPinLocation().x);
-    var dyA = (a.location.y - getMainPinLocation().y);
-    var dxB = (b.location.x - getMainPinLocation().x);
-    var dyB = (b.location.y - getMainPinLocation().y);
-    var distanceA = Math.sqrt(Math.pow(dxA, 2) + Math.pow(dyA, 2));
-    var distanceB = Math.sqrt(Math.pow(dxB, 2) + Math.pow(dyB, 2));
+  /**
+   * Возвращает расстояние до главной метки
+   *
+   * @param {node} pin Метка, от которой считаем расстояние
+   */
+  function calculateDistance(pin) {
+    var dx = (pin.location.x - getMainPinLocation().x);
+    var dy = (pin.location.y - getMainPinLocation().y);
 
-    return distanceA - distanceB;
+    return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
   }
 
   /**
@@ -141,6 +191,50 @@
     var locationY = MAP_MAIN_PIN.offsetTop + pinCorrection;
 
     return {x: locationX, y: locationY};
+  }
+
+  /**
+   * Возвращает ранг отеля для сортировки
+   *
+   * @param {object} hotel Данные отеля
+   * @return {object} rank Рассчитанный ранг
+   */
+  function getRank(hotel) {
+    var rank = 0;
+
+    if (hotel.offer.type === filters['housing-type']) {
+      rank += 2;
+    }
+
+    if (getPriceCategory(hotel.offer.price) === filters['housing-price']) {
+      rank += 2;
+    }
+
+    if (hotel.offer.rooms === filters['housing-rooms']) {
+      rank += 1;
+    }
+
+    if (hotel.offer.guests === filters['housing-guests']) {
+      rank += 1;
+    }
+
+    hotel.offer.features.forEach(function (feature) {
+      if (filters['housing-features']['filter-' + feature]) {
+        rank += 1;
+      }
+    });
+
+    return rank;
+  }
+
+  function getPriceCategory(price) {
+    if (price < 10000) {
+      return 'low';
+    } else if (price > 50000) {
+      return 'high';
+    } else {
+      return 'middle';
+    }
   }
 
   window.map = {
