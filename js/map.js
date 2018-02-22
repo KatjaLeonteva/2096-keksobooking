@@ -58,6 +58,11 @@
     var onMouseMove = function (moveEvt) {
       moveEvt.preventDefault();
 
+      // Первое перемещение метки переводит страницу в активное состояние
+      if (!isActive) {
+        activateMap();
+      }
+
       var shift = {
         x: startCoords.x - moveEvt.clientX,
         y: startCoords.y - moveEvt.clientY
@@ -83,10 +88,6 @@
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
-
-      if (!isActive) {
-        activateMap();
-      }
     };
 
     document.addEventListener('mousemove', onMouseMove);
