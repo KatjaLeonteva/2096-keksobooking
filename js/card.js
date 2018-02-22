@@ -6,17 +6,26 @@
 'use strict';
 
 (function () {
+  var MAP_ELEMENT = document.querySelector('.map');
+  var MAP_FILTERS_ELEMENT = MAP_ELEMENT.querySelector('.map__filters-container');
+
+  var TEMPLATE = document.querySelector('template').content;
+  var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
+
   /**
    * Создает объявление по шаблону и вставляет в DOM
    *
    * @param {object} cardData Данные для объявления.
-   * @param {Node} cardTemplate Шаблон карточки объявления.
-   * @param {Node} insertToElement Элемент, в который вставляется карточка.
-   * @param {Node} insertBeforeElement Элемент, перед которым вставляется карточка.
-   * @param {function} clickHandler Колбэк по закрытию карточки.
+   * @param {function} onCardClose Колбэк по закрытию карточки.
    */
-  function renderCard(cardData, cardTemplate, insertToElement, insertBeforeElement, clickHandler) {
-    var cardElement = cardTemplate.cloneNode(true);
+  function renderCard(cardData, onCardClose) {
+    // Удаляем открытую карточку
+    var existingCard = document.querySelector('.map__card');
+    if (existingCard) {
+      existingCard.remove();
+    }
+
+    var cardElement = CARD_TEMPLATE.cloneNode(true);
 
     var cardAvatar = cardElement.querySelector('.popup__avatar');
     cardAvatar.setAttribute('src', cardData.author.avatar);
@@ -48,11 +57,11 @@
     var cardPicturesList = cardElement.querySelector('.popup__pictures');
     renderCardPictures(cardData.offer.photos, cardPicturesList);
 
-    insertToElement.insertBefore(cardElement, insertBeforeElement);
+    MAP_ELEMENT.insertBefore(cardElement, MAP_FILTERS_ELEMENT);
 
     cardElement.querySelector('.popup__close').addEventListener('click', function () {
       cardElement.remove();
-      clickHandler();
+      onCardClose();
     });
   }
 

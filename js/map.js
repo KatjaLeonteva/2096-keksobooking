@@ -13,14 +13,8 @@
   var MAP_PINS_ELEMENT = MAP_ELEMENT.querySelector('.map__pins');
   var MAP_FILTERS_ELEMENT = MAP_ELEMENT.querySelector('.map__filters-container');
 
-  var TEMPLATE = document.querySelector('template').content;
-  var PIN_TEMPLATE = TEMPLATE.querySelector('.map__pin');
-  var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
-
   var MAIN_PIN_CORRECTION = 48;
   var PINS_NUM = 5;
-  var PIN_WIDTH = 50;
-  var PIN_HEIGHT = 70;
 
   var hotels = [];
 
@@ -117,7 +111,7 @@
     var fragment = document.createDocumentFragment();
 
     for (var i = 0; i < PINS_NUM; i++) {
-      fragment.appendChild(window.renderPin(sortedHotels[i], PIN_TEMPLATE, PIN_WIDTH, PIN_HEIGHT, pinClickHandler));
+      fragment.appendChild(window.renderPin(sortedHotels[i]));
     }
 
     MAP_PINS_ELEMENT.appendChild(fragment);
@@ -132,39 +126,6 @@
     var distanceB = Math.sqrt(Math.pow(dxB, 2) + Math.pow(dyB, 2));
 
     return distanceA - distanceB;
-  }
-
-  /**
-   * События по клику на метку
-   *
-   * @param {Node} selectedPinElement Метка.
-   * @param {object} selectedPinData Данные метки.
-   */
-  function pinClickHandler(selectedPinElement, selectedPinData) {
-    // Переключает класс
-    toggleSelectedPin(MAP_PINS_ELEMENT.querySelectorAll('.map__pin'), selectedPinElement);
-
-    // Удаляет карточки
-    window.utils.cleanNode(MAP_ELEMENT, '.map__card');
-
-    // Отрисовывает карточку для выбранной метки
-    window.renderCard(selectedPinData, CARD_TEMPLATE, MAP_ELEMENT, MAP_FILTERS_ELEMENT, function () {
-      selectedPinElement.classList.remove('map__pin--selected');
-    });
-  }
-
-  /**
-   * Добавляет класс --selected выбранной метке
-   * удаляет этот класс с выбранной ранее метки
-   *
-   * @param {array} pins Все метки.
-   * @param {Node} selectedPin Выбранная метка.
-   */
-  function toggleSelectedPin(pins, selectedPin) {
-    for (var i = 0; i < pins.length; i++) {
-      pins[i].classList.remove('map__pin--selected');
-    }
-    selectedPin.classList.add('map__pin--selected');
   }
 
   /**
