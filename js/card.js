@@ -19,7 +19,7 @@
    * @param {function} onCardClose Колбэк по закрытию карточки.
    */
   function renderCard(cardData, onCardClose) {
-    // Удаляем открытую карточку
+    // Удаляем открытую карточку (ТЗ 4.3)
     var existingCard = document.querySelector('.map__card');
     if (existingCard) {
       existingCard.remove();

@@ -148,7 +148,7 @@
    *
    */
   function renderPins() {
-    cleanMap();
+    cleanMap(); // ТЗ 4.9
 
     var filteredHotels = hotels.slice()
         .filter(checkFilters)
