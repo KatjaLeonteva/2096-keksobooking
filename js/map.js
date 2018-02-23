@@ -15,21 +15,23 @@
   var MAP_FILTERS = MAP_FILTERS_ELEMENT.querySelector('.map__filters');
 
   var MAIN_PIN_CORRECTION = 48;
-  var PINS_NUM = 5;
+  var PINS_NUM = 5; // ТЗ 4.6
 
   var hotels = [];
   var filters = {
-    'housing-type': 'any',
-    'housing-price': 'any',
-    'housing-rooms': 'any',
-    'housing-guests': 'any',
-    'housing-features': {
-      'filter-wifi': false,
-      'filter-dishwasher': false,
-      'filter-parking': false,
-      'filter-washer': false,
-      'filter-elevator': false,
-      'filter-conditioner': false
+    'housing': {
+      'type': MAP_FILTERS.querySelector('#housing-type').value,
+      'price': MAP_FILTERS.querySelector('#housing-price').value,
+      'rooms': MAP_FILTERS.querySelector('#housing-rooms').value,
+      'guests': MAP_FILTERS.querySelector('#housing-guests').value
+    },
+    'features': {
+      'wifi': MAP_FILTERS.querySelector('#filter-wifi').checked,
+      'dishwasher': MAP_FILTERS.querySelector('#filter-dishwasher').checked,
+      'parking': MAP_FILTERS.querySelector('#filter-parking').checked,
+      'washer': MAP_FILTERS.querySelector('#filter-washer').checked,
+      'elevator': MAP_FILTERS.querySelector('#filter-elevator').checked,
+      'conditioner': MAP_FILTERS.querySelector('#filter-conditioner').checked
     }
   };
 
@@ -95,10 +97,11 @@
 
   // Изменение фильтров
   MAP_FILTERS.addEventListener('change', function (evt) {
-    if (evt.target.type === 'checkbox') {
-      filters['housing-features'][evt.target.id] = evt.target.checked;
+    if (evt.target.name === 'features') {
+      filters.features[evt.target.value] = evt.target.checked;
     } else {
-      filters[evt.target.id] = evt.target.value;
+      var key = evt.target.name.split('-')[1];
+      filters.housing[key] = evt.target.value;
     }
     window.debounce(renderPins);
   });
@@ -147,21 +150,45 @@
   function renderPins() {
     cleanMap();
 
-    var sortedHotels = hotels.slice().sort(function (left, right) {
-      var diff = getRank(right) - getRank(left);
-      if (diff === 0) {
-        diff = calculateDistance(left) - calculateDistance(right);
-      }
-      return diff;
-    });
+    var filteredHotels = hotels.slice()
+        .filter(checkFilters)
+        .sort(function (left, right) {
+          return calculateDistance(left) - calculateDistance(right);
+        });
 
     var fragment = document.createDocumentFragment();
 
-    for (var i = 0; i < PINS_NUM; i++) {
-      fragment.appendChild(window.renderPin(sortedHotels[i]));
+    var num = Math.min(filteredHotels.length, PINS_NUM);
+
+    for (var i = 0; i < num; i++) {
+      fragment.appendChild(window.renderPin(filteredHotels[i]));
     }
 
     MAP_PINS_ELEMENT.appendChild(fragment);
+  }
+
+  function checkFilters(hotel) {
+    // Проверяем основные параметры жилья
+    for (var prop in filters.housing) {
+      if (filters.housing.hasOwnProperty(prop)) {
+        var hotelPropValue = hotel.offer[prop];
+        if (prop === 'price') {
+          hotelPropValue = getPriceCategory(hotelPropValue);
+        }
+        if ((filters.housing[prop] !== 'any') && (hotelPropValue.toString() !== filters.housing[prop])) {
+          return false;
+        }
+      }
+    }
+    // Проверяем удобства
+    for (var feat in filters.features) {
+      if (filters.features.hasOwnProperty(feat)) {
+        if (filters.features[feat] === true && hotel.offer.features.indexOf(feat) === -1) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   /**
@@ -192,44 +219,10 @@
     return {x: locationX, y: locationY};
   }
 
-  /**
-   * Возвращает ранг отеля для сортировки
-   *
-   * @param {object} hotel Данные отеля
-   * @return {object} rank Рассчитанный ранг
-   */
-  function getRank(hotel) {
-    var rank = 0;
-
-    if (hotel.offer.type === filters['housing-type']) {
-      rank += 2;
-    }
-
-    if (getPriceCategory(hotel.offer.price) === filters['housing-price']) {
-      rank += 2;
-    }
-
-    if (hotel.offer.rooms === filters['housing-rooms']) {
-      rank += 1;
-    }
-
-    if (hotel.offer.guests === filters['housing-guests']) {
-      rank += 1;
-    }
-
-    hotel.offer.features.forEach(function (feature) {
-      if (filters['housing-features']['filter-' + feature]) {
-        rank += 1;
-      }
-    });
-
-    return rank;
-  }
-
   function getPriceCategory(price) {
     if (price < 10000) {
       return 'low';
-    } else if (price > 50000) {
+    } else if (price >= 50000) {
       return 'high';
     } else {
       return 'middle';
