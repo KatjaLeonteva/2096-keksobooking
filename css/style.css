@@ -82,7 +82,8 @@ textarea
 input[type=text]:hover,
 input[type=number]:hover,
 select:hover,
-textarea:hover
+textarea:hover,
+input[type=file]:focus + label
 {
     border-color: #fa9;
 }
@@ -90,7 +91,8 @@ textarea:hover
 input[type=text]:focus,
 input[type=number]:focus,
 select:focus,
-textarea:focus
+textarea:focus,
+input[type=checkbox]:focus + label
 {
     outline: none;
     box-shadow: 0 0 4px 1px #ff6547;
