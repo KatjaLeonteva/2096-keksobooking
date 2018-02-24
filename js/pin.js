@@ -44,9 +44,7 @@
     toggleSelectedPin(selectedPinElement);
 
     // Отрисовывает карточку для выбранной метки
-    window.renderCard(selectedPinData, function () {
-      selectedPinElement.classList.remove('map__pin--selected');
-    });
+    window.renderCard(selectedPinData);
   }
 
   /**

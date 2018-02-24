@@ -12,13 +12,15 @@
   var TEMPLATE = document.querySelector('template').content;
   var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
 
+  var ESC_KEYCODE = 27;
+
   /**
    * Создает объявление по шаблону и вставляет в DOM
    *
    * @param {object} cardData Данные для объявления.
    * @param {function} onCardClose Колбэк по закрытию карточки.
    */
-  function renderCard(cardData, onCardClose) {
+  function renderCard(cardData) {
     // Удаляем открытую карточку (ТЗ 4.3)
     var existingCard = document.querySelector('.map__card');
     if (existingCard) {
@@ -59,10 +61,21 @@
 
     MAP_ELEMENT.insertBefore(cardElement, MAP_FILTERS_ELEMENT);
 
-    cardElement.querySelector('.popup__close').addEventListener('click', function () {
-      cardElement.remove();
-      onCardClose();
-    });
+    cardElement.querySelector('.popup__close').addEventListener('click', closeCard);
+
+    document.addEventListener('keydown', onEscPress);
+  }
+
+  function closeCard() {
+    document.querySelector('.map__card').remove();
+    document.querySelector('.map__pin--selected').classList.remove('map__pin--selected');
+    document.removeEventListener('keydown', onEscPress);
+  }
+
+  function onEscPress(evt) {
+    if (evt.keyCode === ESC_KEYCODE) {
+      closeCard();
+    }
   }
 
   /**
