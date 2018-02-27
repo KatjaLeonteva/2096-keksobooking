@@ -117,6 +117,7 @@
     window.backend.load(function (response) {
       hotels = response;
       renderPins();
+      activateFilters();
     }, function (errorMessage) {
       window.message(errorMessage);
     });
@@ -141,6 +142,16 @@
   function cleanMap() {
     window.utils.cleanNode(MAP_ELEMENT, '.map__card');
     window.utils.cleanNode(MAP_PINS_ELEMENT, '.map__pin:not(.map__pin--main)');
+  }
+
+  /**
+   * Разблокирует фильтры (ТЗ 4.7)
+   *
+   */
+  function activateFilters() {
+    for (var i = 0; i < MAP_FILTERS.children.length; i++) {
+      MAP_FILTERS.children[i].disabled = false;
+    }
   }
 
   /**
