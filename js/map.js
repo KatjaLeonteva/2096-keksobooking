@@ -129,10 +129,12 @@
    */
   function deactivateMap() {
     cleanMap();
-    MAP_ELEMENT.classList.add('map--faded');
+    deactivateFilters();
 
     MAP_MAIN_PIN.style.top = '';
     MAP_MAIN_PIN.style.left = '';
+
+    MAP_ELEMENT.classList.add('map--faded');
   }
 
   /**
@@ -145,12 +147,22 @@
   }
 
   /**
-   * Разблокирует фильтры (ТЗ 4.7)
+   * Разблокировка фильтров (ТЗ 4.7)
    *
    */
   function activateFilters() {
     for (var i = 0; i < MAP_FILTERS.children.length; i++) {
       MAP_FILTERS.children[i].disabled = false;
+    }
+  }
+
+  /**
+   * Блокировка фильтров
+   *
+   */
+  function deactivateFilters() {
+    for (var i = 0; i < MAP_FILTERS.children.length; i++) {
+      MAP_FILTERS.children[i].disabled = true;
     }
   }
 

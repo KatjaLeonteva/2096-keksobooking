@@ -192,7 +192,7 @@
     // Убираем затемнение формы
     form.classList.remove('notice__form--disabled');
 
-    // Активация полей формы
+    // Разблокировка полей формы
     for (var i = 0; i < fieldsets.length; i++) {
       fieldsets[i].disabled = false;
     }
@@ -211,7 +211,7 @@
     // Сброс аватарки
     form.querySelector('.notice__preview img').setAttribute('src', 'img/muffin.png');
 
-    // Деактивация полей формы
+    // Блокировка полей формы
     for (var i = 0; i < fieldsets.length; i++) {
       fieldsets[i].disabled = true;
     }
