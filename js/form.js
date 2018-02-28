@@ -7,6 +7,7 @@
 
 (function () {
   var form = document.querySelector('.notice__form');
+  var fieldsets = form.querySelectorAll('fieldset');
 
   // Заполняем поле адреса после открытия страницы
   updateAddress(false);
@@ -188,9 +189,10 @@
   });
 
   function activateForm() {
+    // Убираем затемнение формы
     form.classList.remove('notice__form--disabled');
 
-    var fieldsets = form.querySelectorAll('fieldset');
+    // Активация полей формы
     for (var i = 0; i < fieldsets.length; i++) {
       fieldsets[i].disabled = false;
     }
@@ -203,7 +205,18 @@
   }
 
   function deactivateForm() {
+    // Сброс полей формы
     form.reset();
+
+    // Сброс аватарки
+    form.querySelector('.notice__preview img').setAttribute('src', 'img/muffin.png');
+
+    // Деактивация полей формы
+    for (var i = 0; i < fieldsets.length; i++) {
+      fieldsets[i].disabled = true;
+    }
+
+    // Добавляем затемнение формы
     form.classList.add('notice__form--disabled');
 
     window.map.deactivateMap();
