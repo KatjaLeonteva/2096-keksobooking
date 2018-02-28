@@ -11,7 +11,6 @@
 
   var avatarInput = form.querySelector('#avatar');
   var avatarPreview = form.querySelector('.notice__preview img');
-  var imagesInput = form.querySelector('#images');
 
   // Заполняем поле адреса после открытия страницы
   updateAddress(false);
@@ -188,20 +187,7 @@
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
 
-    var formData = new FormData(form);
-
-    if (avatarInput.files.length) {
-      formData.append('avatar', avatarInput.files[0]);
-    }
-
-    var imagesList = imagesInput.files;
-    if (imagesList.length) {
-      for (var i = 0; i < imagesList.length; i++) {
-        formData.append('photos', imagesList[i]);
-      }
-    }
-
-    window.backend.save(formData, function () {
+    window.backend.save(new FormData(form), function () {
       window.message('Данные отправлены успешно!');
       deactivateForm();
     }, function (errorMessage) {
