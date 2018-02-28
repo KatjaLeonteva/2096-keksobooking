@@ -145,11 +145,7 @@
 
     // Ограничиваем возможность выбора неправильных вариантов
     for (var i = 0; i < capacity.options.length; i++) {
-      if (allowedCapacity.indexOf(capacity.options[i].value) === -1) {
-        capacity.options[i].disabled = true;
-      } else {
-        capacity.options[i].disabled = false;
-      }
+      capacity.options[i].disabled = (allowedCapacity.indexOf(capacity.options[i].value) === -1);
     }
 
     // Добавляем / убираем сообщение об ошибке
@@ -178,6 +174,15 @@
   formReset.addEventListener('click', function (evt) {
     evt.preventDefault();
     deactivateForm();
+  });
+
+  var typesAllowEnter = ['submit', 'reset', 'file'];
+  form.addEventListener('keydown', function (evt) {
+    window.utils.isEnterEvent(evt, function () {
+      if (typesAllowEnter.indexOf(evt.target.type) === -1) {
+        evt.preventDefault();
+      }
+    });
   });
 
   form.addEventListener('submit', function (evt) {

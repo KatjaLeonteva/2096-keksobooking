@@ -12,8 +12,6 @@
   var TEMPLATE = document.querySelector('template').content;
   var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
 
-  var ESC_KEYCODE = 27;
-
   /**
    * Создает объявление по шаблону и вставляет в DOM
    *
@@ -63,9 +61,7 @@
   }
 
   function onEscPress(evt) {
-    if (evt.keyCode === ESC_KEYCODE) {
-      closeCard();
-    }
+    window.utils.isEscEvent(evt, closeCard);
   }
 
   /**
