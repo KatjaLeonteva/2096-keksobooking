@@ -9,6 +9,10 @@
   var form = document.querySelector('.notice__form');
   var fieldsets = form.querySelectorAll('fieldset');
 
+  var avatarInput = form.querySelector('#avatar');
+  var avatarPreview = form.querySelector('.notice__preview img');
+  var imagesInput = form.querySelector('#images');
+
   // Заполняем поле адреса после открытия страницы
   updateAddress(false);
 
@@ -164,8 +168,6 @@
     checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
   });
 
-  var avatarInput = form.querySelector('#avatar');
-  var avatarPreview = form.querySelector('.notice__preview img');
   avatarInput.addEventListener('change', function (evt) {
     avatarPreview.setAttribute('src', URL.createObjectURL(evt.target.files[0]));
   });
@@ -180,7 +182,21 @@
 
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
-    window.backend.save(new FormData(form), function () {
+
+    var formData = new FormData(form);
+
+    if (avatarInput.files.length) {
+      formData.append('avatar', avatarInput.files[0]);
+    }
+
+    var imagesList = imagesInput.files;
+    if (imagesList.length) {
+      for (var i = 0; i < imagesList.length; i++) {
+        formData.append('photos', imagesList[i]);
+      }
+    }
+
+    window.backend.save(formData, function () {
       window.message('Данные отправлены успешно!');
       deactivateForm();
     }, function (errorMessage) {
@@ -209,7 +225,7 @@
     form.reset();
 
     // Сброс аватарки
-    form.querySelector('.notice__preview img').setAttribute('src', 'img/muffin.png');
+    avatarPreview.setAttribute('src', 'img/muffin.png');
 
     // Блокировка полей формы
     for (var i = 0; i < fieldsets.length; i++) {
