@@ -17,6 +17,8 @@
 
   var DEFAULT_AVATAR = 'img/muffin.png';
 
+  var dropZones = form.querySelectorAll('.drop-zone');
+
   // Заполняем поле адреса после открытия страницы
   updateAddress(false);
 
@@ -241,6 +243,12 @@
       fieldsets[i].disabled = false;
     }
 
+    // Активация dropzone
+    [].forEach.call(dropZones, function (dropZone) {
+      dropZone.addEventListener('dragover', onDropzoneOver, false);
+      dropZone.addEventListener('drop', onDropzoneDrop, false);
+    });
+
     // Это нужно, чтобы валидация работала правильно,
     // если пользователь не будет изменять эти поля
     updateAddress(true);
@@ -255,6 +263,12 @@
     // Сброс фотографий
     avatarPreview.src = DEFAULT_AVATAR;
     window.utils.cleanNode(photosContainer, '.form__photo');
+
+    // Деактивация dropzone
+    [].forEach.call(dropZones, function (dropZone) {
+      dropZone.removeEventListener('dragover', onDropzoneOver);
+      dropZone.removeEventListener('drop', onDropzoneDrop);
+    });
 
     // Блокировка полей формы
     for (var i = 0; i < fieldsets.length; i++) {
@@ -273,6 +287,19 @@
     var addressInput = form.querySelector('[name="address"]');
     var mainPinLocation = window.map.getMainPinLocation(isActiveMap);
     addressInput.value = mainPinLocation.x + ', ' + mainPinLocation.y;
+  }
+
+  function onDropzoneOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+  }
+
+  function onDropzoneDrop(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+
+    var fileInputId = '#' + evt.target.getAttribute('for');
+    form.querySelector(fileInputId).files = evt.dataTransfer.files;
   }
 
   window.form = {
