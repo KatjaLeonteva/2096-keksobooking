@@ -8,6 +8,7 @@
 (function () {
   var ESC_KEYCODE = 27;
   var ENTER_KEYCODE = 13;
+  var FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
 
   function isEscEvent(evt, action) {
     if (evt.keyCode === ESC_KEYCODE) {
@@ -40,9 +41,28 @@
     }
   }
 
+  function getFileUrl(file, cb) {
+    var fileName = file.name.toLowerCase();
+
+    var matches = FILE_TYPES.some(function (it) {
+      return fileName.endsWith(it);
+    });
+
+    if (matches) {
+      var reader = new FileReader();
+
+      reader.addEventListener('load', function () {
+        cb(reader.result);
+      });
+
+      reader.readAsDataURL(file);
+    }
+  }
+
   window.utils = {
     cleanNode: cleanNode,
     isEscEvent: isEscEvent,
-    isEnterEvent: isEnterEvent
+    isEnterEvent: isEnterEvent,
+    getFileUrl: getFileUrl
   };
 })();

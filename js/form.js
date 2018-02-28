@@ -12,6 +12,11 @@
   var avatarInput = form.querySelector('#avatar');
   var avatarPreview = form.querySelector('.notice__preview img');
 
+  var photosInput = form.querySelector('#images');
+  var photosContainer = form.querySelector('.form__photo-container');
+
+  var DEFAULT_AVATAR = 'img/muffin.png';
+
   // Заполняем поле адреса после открытия страницы
   updateAddress(false);
 
@@ -163,8 +168,40 @@
     checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
   });
 
+  // Загрузка фотографии пользователя
   avatarInput.addEventListener('change', function (evt) {
-    avatarPreview.setAttribute('src', URL.createObjectURL(evt.target.files[0]));
+    if (evt.target.files.length > 0) {
+      window.utils.getFileUrl(evt.target.files[0], function (imageUrl) {
+        avatarPreview.src = imageUrl;
+      });
+    } else {
+      avatarPreview.src = DEFAULT_AVATAR;
+    }
+  });
+
+  // Загрузка фотографий жилья
+  photosInput.addEventListener('change', function (evt) {
+    var filesList = evt.target.files;
+    if (filesList.length > 0) {
+
+      for (var i = 0; i < filesList.length; i++) {
+
+        window.utils.getFileUrl(filesList[i], function (imageUrl) {
+          var photoElement = document.createElement('div');
+          photoElement.classList.add('form__photo');
+
+          var photo = document.createElement('img');
+          photo.src = imageUrl;
+
+          photoElement.appendChild(photo);
+          photosContainer.appendChild(photoElement);
+        });
+
+      }
+
+    } else {
+      window.utils.cleanNode(photosContainer, '.form__photo');
+    }
   });
 
   // ТЗ 1.7. Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
@@ -215,8 +252,9 @@
     // Сброс полей формы
     form.reset();
 
-    // Сброс аватарки
-    avatarPreview.setAttribute('src', 'img/muffin.png');
+    // Сброс фотографий
+    avatarPreview.src = DEFAULT_AVATAR;
+    window.utils.cleanNode(photosContainer, '.form__photo');
 
     // Блокировка полей формы
     for (var i = 0; i < fieldsets.length; i++) {
