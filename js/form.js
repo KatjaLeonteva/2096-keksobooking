@@ -191,6 +191,7 @@
         window.utils.getFileUrl(filesList[i], function (imageUrl) {
           var photoElement = document.createElement('div');
           photoElement.classList.add('form__photo');
+          photoElement.draggable = true;
 
           var photo = document.createElement('img');
           photo.src = imageUrl;
@@ -299,7 +300,9 @@
     evt.preventDefault();
 
     var fileInputId = '#' + evt.target.getAttribute('for');
-    form.querySelector(fileInputId).files = evt.dataTransfer.files;
+    if (evt.dataTransfer.files.length) {
+      form.querySelector(fileInputId).files = evt.dataTransfer.files;
+    }
   }
 
   window.form = {
