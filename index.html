@@ -32,34 +32,34 @@
 
     <div class="map__filters-container">
       <form action="#" class="map__filters" autocomplete="off">
-        <select name="housing-type" id="housing-type" class="map__filter">
+        <select name="housing-type" id="housing-type" class="map__filter" disabled>
           <option value="any" selected>Любой тип жилья</option>
           <option value="flat">Квартира</option>
           <option value="house">Дом</option>
           <option value="bungalo">Сарай</option>
         </select>
 
-        <select name="housing-price" id="housing-price" class="map__filter">
+        <select name="housing-price" id="housing-price" class="map__filter" disabled>
           <option value="any" selected>Любая</option>
           <option value="middle">10000 - 50000&#x20bd;</option>
           <option value="low">до 10000&#x20bd;</option>
           <option value="high">от 50000&#x20bd;</option>
         </select>
 
-        <select name="housing-rooms" id="housing-rooms" class="map__filter">
+        <select name="housing-rooms" id="housing-rooms" class="map__filter" disabled>
           <option value="any" selected>Любое число комнат</option>
           <option value="1">Одна комната</option>
           <option value="2">Две комнаты</option>
           <option value="3">Три комнаты</option>
         </select>
 
-        <select name="housing-guests" id="housing-guests" class="map__filter">
+        <select name="housing-guests" id="housing-guests" class="map__filter" disabled>
           <option value="any" selected>Любое число гостей</option>
           <option value="1">Один гость</option>
           <option value="2">Два гостя</option>
         </select>
 
-        <fieldset id="housing-features" class="map__filter-set features">
+        <fieldset id="housing-features" class="map__filter-set features" disabled>
           <input type="checkbox" name="features" value="wifi" id="filter-wifi">
           <label class="feature feature--wifi" for="filter-wifi">Wi-Fi</label>
 
@@ -97,7 +97,7 @@
             <div class="notice__preview">
               <img src="img/muffin.png" alt="Аватар пользователя"  width="40" height="44">
             </div>
-            <input type="file" id="avatar">
+            <input type="file" id="avatar" name="avatar">
             <label class="drop-zone" for="avatar">Загрузите или&nbsp;перетащите сюда фото</label>
             <p class="notice__info">Заполните все обязательные поля, назначьте цену, загрузите фотографии. Придумайте интересное описание. Оно сделает объявление более живым и привлекательным. Получившееся объявление должно давать гостям полное представление о вашем жилье.</p>
           </div>
@@ -194,7 +194,7 @@
         <label>Фотографии жилья</label>
         <div class="form__photo-container">
           <div class="upload">
-            <input type="file" id="images">
+            <input type="file" id="images" multiple name="photos">
             <label for="images" class="drop-zone">Загрузите или&nbsp;перетащите сюда фото</label>
           </div>
         </div>
@@ -250,6 +250,7 @@
 </template>
 
 <script src="js/utils.js"></script>
+<script src="js/debounce.js"></script>
 <script src="js/backend.js"></script>
 <script src="js/message.js"></script>
 <script src="js/pin.js"></script>

@@ -1,9 +1,16 @@
-// Модуль, который работает с формой объявления
+/**
+ * @fileoverview Модуль, который работает с формой объявления
+ * @author Екатерина Леонтьева
+ */
 
 'use strict';
 
 (function () {
   var form = document.querySelector('.notice__form');
+  var fieldsets = form.querySelectorAll('fieldset');
+
+  var avatarInput = form.querySelector('#avatar');
+  var avatarPreview = form.querySelector('.notice__preview img');
 
   // Заполняем поле адреса после открытия страницы
   updateAddress(false);
@@ -137,11 +144,7 @@
 
     // Ограничиваем возможность выбора неправильных вариантов
     for (var i = 0; i < capacity.options.length; i++) {
-      if (allowedCapacity.indexOf(capacity.options[i].value) === -1) {
-        capacity.options[i].disabled = true;
-      } else {
-        capacity.options[i].disabled = false;
-      }
+      capacity.options[i].disabled = (allowedCapacity.indexOf(capacity.options[i].value) === -1);
     }
 
     // Добавляем / убираем сообщение об ошибке
@@ -160,6 +163,10 @@
     checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
   });
 
+  avatarInput.addEventListener('change', function (evt) {
+    avatarPreview.setAttribute('src', URL.createObjectURL(evt.target.files[0]));
+  });
+
   // ТЗ 1.7. Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
   var formReset = form.querySelector('.form__reset');
 
@@ -168,8 +175,18 @@
     deactivateForm();
   });
 
+  var typesAllowEnter = ['submit', 'reset', 'file'];
+  form.addEventListener('keydown', function (evt) {
+    window.utils.isEnterEvent(evt, function () {
+      if (typesAllowEnter.indexOf(evt.target.type) === -1) {
+        evt.preventDefault();
+      }
+    });
+  });
+
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
+
     window.backend.save(new FormData(form), function () {
       window.message('Данные отправлены успешно!');
       deactivateForm();
@@ -179,9 +196,10 @@
   });
 
   function activateForm() {
+    // Убираем затемнение формы
     form.classList.remove('notice__form--disabled');
 
-    var fieldsets = form.querySelectorAll('fieldset');
+    // Разблокировка полей формы
     for (var i = 0; i < fieldsets.length; i++) {
       fieldsets[i].disabled = false;
     }
@@ -194,7 +212,18 @@
   }
 
   function deactivateForm() {
+    // Сброс полей формы
     form.reset();
+
+    // Сброс аватарки
+    avatarPreview.setAttribute('src', 'img/muffin.png');
+
+    // Блокировка полей формы
+    for (var i = 0; i < fieldsets.length; i++) {
+      fieldsets[i].disabled = true;
+    }
+
+    // Добавляем затемнение формы
     form.classList.add('notice__form--disabled');
 
     window.map.deactivateMap();
@@ -204,7 +233,8 @@
 
   function updateAddress(isActiveMap) {
     var addressInput = form.querySelector('[name="address"]');
-    addressInput.value = window.map.getMainPinLocation(isActiveMap);
+    var mainPinLocation = window.map.getMainPinLocation(isActiveMap);
+    addressInput.value = mainPinLocation.x + ', ' + mainPinLocation.y;
   }
 
   window.form = {

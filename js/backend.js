@@ -1,3 +1,8 @@
+/**
+ * @fileoverview Модуль для загрузки и отправки данных
+ * @author Екатерина Леонтьева
+ */
+
 'use strict';
 
 (function () {
@@ -30,6 +35,7 @@
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
     xhr.timeout = 10000; // 10s
+
 
     xhr.addEventListener('load', function () {
       if (xhr.status === 200) {
