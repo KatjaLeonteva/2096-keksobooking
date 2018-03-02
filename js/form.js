@@ -14,6 +14,7 @@
 
   var photosInput = form.querySelector('#images');
   var photosContainer = form.querySelector('.form__photo-container');
+  var photosCache = [];
 
   var DEFAULT_AVATAR = 'img/muffin.png';
 
@@ -184,27 +185,32 @@
   // Загрузка фотографий жилья
   photosInput.addEventListener('change', function (evt) {
     var filesList = evt.target.files;
-    if (filesList.length > 0) {
 
-      for (var i = 0; i < filesList.length; i++) {
-
-        window.utils.getFileUrl(filesList[i], function (imageUrl) {
-          var photoElement = document.createElement('div');
-          photoElement.classList.add('form__photo');
-          photoElement.draggable = true;
-
-          var photo = document.createElement('img');
-          photo.src = imageUrl;
-
-          photoElement.appendChild(photo);
-          photosContainer.appendChild(photoElement);
-        });
-
-      }
-
-    } else {
-      window.utils.cleanNode(photosContainer, '.form__photo');
+    if (filesList.length === 0) {
+      return;
     }
+
+    for (var i = 0; i < filesList.length; i++) {
+
+      var file = filesList[i];
+
+      window.utils.getFileUrl(filesList[i], function (imageUrl) {
+
+        photosCache.push(file);
+
+        var photoElement = document.createElement('div');
+        photoElement.classList.add('form__photo');
+        photoElement.draggable = true;
+
+        var photo = document.createElement('img');
+        photo.src = imageUrl;
+
+        photoElement.appendChild(photo);
+        photosContainer.appendChild(photoElement);
+      });
+
+    }
+
   });
 
   // ТЗ 1.7. Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
@@ -227,7 +233,12 @@
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
 
-    window.backend.save(new FormData(form), function () {
+    var formData = new FormData(form);
+    photosCache.forEach(function (photo) {
+      formData.append('photos', photo);
+    });
+
+    window.backend.save(formData, function () {
       window.message('Данные отправлены успешно!');
       deactivateForm();
     }, function (errorMessage) {
