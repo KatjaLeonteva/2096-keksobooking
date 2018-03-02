@@ -12,6 +12,14 @@
   var avatarInput = form.querySelector('#avatar');
   var avatarPreview = form.querySelector('.notice__preview img');
 
+  var photosInput = form.querySelector('#images');
+  var photosContainer = form.querySelector('.form__photo-container');
+  var photosCache = [];
+
+  var DEFAULT_AVATAR = 'img/muffin.png';
+
+  var dropZones = form.querySelectorAll('.drop-zone');
+
   // Заполняем поле адреса после открытия страницы
   updateAddress(false);
 
@@ -163,8 +171,46 @@
     checkRoomsCapacity(roomsSelect, capacitySelect, rulesRoomsCapacity);
   });
 
+  // Загрузка фотографии пользователя
   avatarInput.addEventListener('change', function (evt) {
-    avatarPreview.setAttribute('src', URL.createObjectURL(evt.target.files[0]));
+    if (evt.target.files.length > 0) {
+      window.utils.getFileUrl(evt.target.files[0], function (imageUrl) {
+        avatarPreview.src = imageUrl;
+      });
+    } else {
+      avatarPreview.src = DEFAULT_AVATAR;
+    }
+  });
+
+  // Загрузка фотографий жилья
+  photosInput.addEventListener('change', function (evt) {
+    var filesList = evt.target.files;
+
+    if (filesList.length === 0) {
+      return;
+    }
+
+    for (var i = 0; i < filesList.length; i++) {
+
+      var file = filesList[i];
+
+      window.utils.getFileUrl(filesList[i], function (imageUrl) {
+
+        photosCache.push(file);
+
+        var photoElement = document.createElement('div');
+        photoElement.classList.add('form__photo');
+        photoElement.draggable = true;
+
+        var photo = document.createElement('img');
+        photo.src = imageUrl;
+
+        photoElement.appendChild(photo);
+        photosContainer.appendChild(photoElement);
+      });
+
+    }
+
   });
 
   // ТЗ 1.7. Нажатие на кнопку .form__reset сбрасывает страницу в исходное неактивное состояние:
@@ -187,7 +233,12 @@
   form.addEventListener('submit', function (evt) {
     evt.preventDefault();
 
-    window.backend.save(new FormData(form), function () {
+    var formData = new FormData(form);
+    photosCache.forEach(function (photo) {
+      formData.append('photos', photo);
+    });
+
+    window.backend.save(formData, function () {
       window.message('Данные отправлены успешно!');
       deactivateForm();
     }, function (errorMessage) {
@@ -204,6 +255,12 @@
       fieldsets[i].disabled = false;
     }
 
+    // Активация dropzone
+    [].forEach.call(dropZones, function (dropZone) {
+      dropZone.addEventListener('dragover', onDropzoneOver, false);
+      dropZone.addEventListener('drop', onDropzoneDrop, false);
+    });
+
     // Это нужно, чтобы валидация работала правильно,
     // если пользователь не будет изменять эти поля
     updateAddress(true);
@@ -215,8 +272,15 @@
     // Сброс полей формы
     form.reset();
 
-    // Сброс аватарки
-    avatarPreview.setAttribute('src', 'img/muffin.png');
+    // Сброс фотографий
+    avatarPreview.src = DEFAULT_AVATAR;
+    window.utils.cleanNode(photosContainer, '.form__photo');
+
+    // Деактивация dropzone
+    [].forEach.call(dropZones, function (dropZone) {
+      dropZone.removeEventListener('dragover', onDropzoneOver);
+      dropZone.removeEventListener('drop', onDropzoneDrop);
+    });
 
     // Блокировка полей формы
     for (var i = 0; i < fieldsets.length; i++) {
@@ -235,6 +299,21 @@
     var addressInput = form.querySelector('[name="address"]');
     var mainPinLocation = window.map.getMainPinLocation(isActiveMap);
     addressInput.value = mainPinLocation.x + ', ' + mainPinLocation.y;
+  }
+
+  function onDropzoneOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+  }
+
+  function onDropzoneDrop(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+
+    var fileInputId = '#' + evt.target.getAttribute('for');
+    if (evt.dataTransfer.files.length) {
+      form.querySelector(fileInputId).files = evt.dataTransfer.files;
+    }
   }
 
   window.form = {
