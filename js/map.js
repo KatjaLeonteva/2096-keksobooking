@@ -35,6 +35,15 @@
     }
   };
 
+  // Нажатие на enter на главной метке
+  MAP_MAIN_PIN.addEventListener('keydown', function (evt) {
+    window.utils.isEnterEvent(evt, function () {
+      if (MAP_ELEMENT.classList.contains('map--faded')) {
+        activateMap();
+      }
+    });
+  });
+
   // Перетаскивание главной метки
   MAP_MAIN_PIN.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
@@ -104,6 +113,17 @@
       filters.housing[key] = evt.target.value;
     }
     window.debounce(renderPins);
+  });
+
+  // Изменение фильтров по нажатию на enter
+  MAP_FILTERS.addEventListener('keydown', function (evt) {
+    window.utils.isEnterEvent(evt, function () {
+      if (evt.target.name === 'features') {
+        evt.target.checked = !evt.target.checked;
+        filters.features[evt.target.value] = evt.target.checked;
+        window.debounce(renderPins);
+      }
+    });
   });
 
   /**
