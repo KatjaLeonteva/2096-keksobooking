@@ -6,15 +6,15 @@
 'use strict';
 
 (function () {
-  var form = document.querySelector('.notice__form');
-  var photosContainer = form.querySelector('.form__photo-container');
+  var FORM = document.querySelector('.notice__form');
+  var PHOTOS_CONTAINER = FORM.querySelector('.form__photo-container');
 
   var draggedItem = null;
 
-  photosContainer.addEventListener('dragstart', onDragStart);
-  photosContainer.addEventListener('dragover', onDragOver);
-  photosContainer.addEventListener('dragleave', onDragLeave);
-  photosContainer.addEventListener('drop', onDrop);
+  PHOTOS_CONTAINER.addEventListener('dragstart', onDragStart);
+  PHOTOS_CONTAINER.addEventListener('dragover', onDragOver);
+  PHOTOS_CONTAINER.addEventListener('dragleave', onDragLeave);
+  PHOTOS_CONTAINER.addEventListener('drop', onDrop);
 
   function onDragStart(evt) {
     if (supportsDragDrop(evt.target)) {

@@ -100,11 +100,11 @@
 
       window.utils.cleanNode(featuresListElement, null);
 
-      for (var i = 0; i < featuresList.length; i++) {
+      featuresList.forEach(function (feature) {
         var featureElement = document.createElement('li');
-        featureElement.classList.add('feature', 'feature--' + featuresList[i]);
+        featureElement.classList.add('feature', 'feature--' + feature);
         fragment.appendChild(featureElement);
-      }
+      });
 
       featuresListElement.appendChild(fragment);
     } else {
@@ -125,15 +125,13 @@
 
       window.utils.cleanNode(picturesListElement, null);
 
-      for (var i = 0; i < cardPicturesList.length; i++) {
+      cardPicturesList.forEach(function (picture) {
         var pictureListItem = document.createElement('li');
         var pictureElement = document.createElement('img');
-        pictureElement.setAttribute('src', cardPicturesList[i]);
-        pictureElement.height = 40;
-        pictureElement.style.marginRight = '5px';
+        pictureElement.setAttribute('src', picture);
         pictureListItem.appendChild(pictureElement);
         fragment.appendChild(pictureListItem);
-      }
+      });
 
       picturesListElement.appendChild(fragment);
     } else {

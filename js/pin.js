@@ -56,9 +56,9 @@
   function toggleSelectedPin(selectedPin) {
     var pins = selectedPin.parentNode.querySelectorAll('.map__pin');
 
-    for (var i = 0; i < pins.length; i++) {
-      pins[i].classList.remove('map__pin--selected');
-    }
+    pins.forEach(function (pin) {
+      pin.classList.remove('map__pin--selected');
+    });
 
     selectedPin.classList.add('map__pin--selected');
   }

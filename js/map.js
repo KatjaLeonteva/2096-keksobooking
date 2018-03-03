@@ -14,6 +14,10 @@
   var MAP_FILTERS_ELEMENT = MAP_ELEMENT.querySelector('.map__filters-container');
   var MAP_FILTERS = MAP_FILTERS_ELEMENT.querySelector('.map__filters');
 
+  var PRICE_LOW = 10000;
+  var PRICE_HIGH = 50000;
+
+  var MAIN_PIN_WIDTH = parseInt(getComputedStyle(MAP_MAIN_PIN).width, 10);
   var MAIN_PIN_CORRECTION = 48;
   var PINS_NUM = 5; // ТЗ 4.6
 
@@ -64,13 +68,13 @@
      * @enum {number}
      */
     var limitCoords = {
-      MIN_X: 0,
-      MAX_X: MAP_ELEMENT.offsetWidth,
+      MIN_X: MAIN_PIN_WIDTH / 2,
+      MAX_X: MAP_ELEMENT.offsetWidth - MAIN_PIN_WIDTH / 2,
       MIN_Y: 150 - MAIN_PIN_CORRECTION, // Линия горизонта (ТЗ 3.4)
       MAX_Y: MAP_FILTERS_ELEMENT.offsetTop - MAIN_PIN_CORRECTION // Ограничение по ТЗ 3.4
     };
 
-    var onMouseMove = function (moveEvt) {
+    function onMouseMove(moveEvt) {
       moveEvt.preventDefault();
 
       var shift = {
@@ -91,14 +95,14 @@
 
       window.form.updateAddress(isActive);
       window.debounce(renderPins);
-    };
+    }
 
-    var onMouseUp = function (upEvt) {
+    function onMouseUp(upEvt) {
       upEvt.preventDefault();
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
-    };
+    }
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
@@ -132,7 +136,7 @@
    */
   function activateMap() {
     MAP_ELEMENT.classList.remove('map--faded');
-    window.form.activateForm();
+    window.form.activate();
 
     window.backend.load(function (response) {
       hotels = response;
@@ -171,9 +175,9 @@
    *
    */
   function activateFilters() {
-    for (var i = 0; i < MAP_FILTERS.children.length; i++) {
-      MAP_FILTERS.children[i].disabled = false;
-    }
+    [].forEach.call(MAP_FILTERS.children, function (filter) {
+      filter.disabled = false;
+    });
   }
 
   /**
@@ -181,9 +185,9 @@
    *
    */
   function deactivateFilters() {
-    for (var i = 0; i < MAP_FILTERS.children.length; i++) {
-      MAP_FILTERS.children[i].disabled = true;
-    }
+    [].forEach.call(MAP_FILTERS.children, function (filter) {
+      filter.disabled = true;
+    });
   }
 
   /**
@@ -226,7 +230,7 @@
     // Проверяем удобства
     for (var feat in filters.features) {
       if (filters.features.hasOwnProperty(feat)) {
-        if (filters.features[feat] === true && hotel.offer.features.indexOf(feat) === -1) {
+        if (filters.features[feat] && hotel.offer.features.indexOf(feat) === -1) {
           return false;
         }
       }
@@ -263,9 +267,9 @@
   }
 
   function getPriceCategory(price) {
-    if (price < 10000) {
+    if (price < PRICE_LOW) {
       return 'low';
-    } else if (price >= 50000) {
+    } else if (price >= PRICE_HIGH) {
       return 'high';
     } else {
       return 'middle';
@@ -273,7 +277,7 @@
   }
 
   window.map = {
-    deactivateMap: deactivateMap,
+    deactivate: deactivateMap,
     getMainPinLocation: getMainPinLocation
   };
 })();
