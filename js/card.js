@@ -12,6 +12,12 @@
   var TEMPLATE = document.querySelector('template').content;
   var CARD_TEMPLATE = TEMPLATE.querySelector('article.map__card');
 
+  var OFFER_TYPE_NAMES = {
+    'flat': 'Квартира',
+    'house': 'Дом',
+    'bungalo': 'Бунгало'
+  };
+
   /**
    * Создает объявление по шаблону и вставляет в DOM
    *
@@ -36,11 +42,11 @@
     var cardDescription = cardFeaturesList.nextElementSibling;
     var cardPicturesList = cardElement.querySelector('.popup__pictures');
 
-    cardAvatar.setAttribute('src', cardData.author.avatar);
+    cardAvatar.src = cardData.author.avatar;
     renderCardText(cardTitle, cardData.offer.title);
     renderCardText(cardAddress, cardData.offer.address);
     renderCardText(cardPrice, cardData.offer.price + '\u20BD\/ночь');
-    renderCardText(cardType, getOfferTypeName(cardData.offer.type));
+    renderCardText(cardType, OFFER_TYPE_NAMES[cardData.offer.type]);
     renderCardText(cardRoomsGuests, cardData.offer.rooms + ' комнаты для ' + cardData.offer.guests + ' гостей');
     renderCardText(cardCheckinCheckout, 'Заезд после ' + cardData.offer.checkin + ', выезд до ' + cardData.offer.checkout);
     renderCardText(cardDescription, cardData.offer.description);
@@ -62,22 +68,6 @@
 
   function onEscPress(evt) {
     window.utils.isEscEvent(evt, closeCard);
-  }
-
-  /**
-   * Возвращает название типа жилья на русском языке
-   *
-   * @param {string} type Тип жилья.
-   * @return {string} Название типа жилья.
-   */
-  function getOfferTypeName(type) {
-    var names = {
-      'flat': 'Квартира',
-      'house': 'Дом',
-      'bungalo': 'Бунгало'
-    };
-
-    return names[type];
   }
 
   function renderCardText(element, text) {
@@ -128,7 +118,7 @@
       cardPicturesList.forEach(function (picture) {
         var pictureListItem = document.createElement('li');
         var pictureElement = document.createElement('img');
-        pictureElement.setAttribute('src', picture);
+        pictureElement.src = picture;
         pictureListItem.appendChild(pictureElement);
         fragment.appendChild(pictureListItem);
       });

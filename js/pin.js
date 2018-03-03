@@ -22,11 +22,11 @@
     pinElement.style.left = (pinData.location.x) + 'px';
     pinElement.style.top = (pinData.location.y - PIN_HEIGHT / 2) + 'px';
 
-    pinElement.querySelector('img').setAttribute('src', pinData.author.avatar);
+    pinElement.querySelector('img').src = pinData.author.avatar;
 
     pinElement.addEventListener('click', function () {
       if (!pinElement.classList.contains('map__pin--selected')) {
-        pinClickHandler(pinElement, pinData);
+        onPinClick(pinElement, pinData);
       }
     });
 
@@ -39,7 +39,7 @@
    * @param {Node} selectedPinElement Метка.
    * @param {object} selectedPinData Данные метки.
    */
-  function pinClickHandler(selectedPinElement, selectedPinData) {
+  function onPinClick(selectedPinElement, selectedPinData) {
     // Переключает класс
     toggleSelectedPin(selectedPinElement);
 

@@ -81,18 +81,18 @@
 
   function setMinPrice(propertyType) {
     var minPrice = MIN_PRICES[propertyType] || 0;
-    PRICE_INPUT.setAttribute('min', minPrice);
-    PRICE_INPUT.setAttribute('placeholder', minPrice);
+    PRICE_INPUT.min = minPrice;
+    PRICE_INPUT.placeholder = minPrice;
   }
 
   // ТЗ 2.2, 2.3. Валидация поля ввода цены
   PRICE_INPUT.addEventListener('invalid', function (evt) {
     if (evt.target.validity.rangeOverflow) {
-      var maxPrice = evt.target.getAttribute('max') || '1 000 000';
+      var maxPrice = evt.target.max || '1 000 000';
       evt.target.setCustomValidity('Цена не должна превышать ' + maxPrice + ' руб.');
 
     } else if (evt.target.validity.rangeUnderflow) {
-      var minPrice = evt.target.getAttribute('min') || '0';
+      var minPrice = evt.target.min || '0';
       evt.target.setCustomValidity('Для этого типа жилья цена не должна быть ниже ' + minPrice + ' руб.');
 
     } else if (evt.target.validity.valueMissing) {
@@ -303,7 +303,7 @@
     evt.stopPropagation();
     evt.preventDefault();
 
-    var fileInputId = '#' + evt.target.getAttribute('for');
+    var fileInputId = '#' + evt.target.htmlFor;
     if (evt.dataTransfer.files.length) {
       FORM.querySelector(fileInputId).files = evt.dataTransfer.files;
     }
