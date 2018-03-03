@@ -223,8 +223,13 @@
 
   var typesAllowEnter = ['submit', 'reset', 'file'];
   form.addEventListener('keydown', function (evt) {
+    var formElement = evt.target;
+
     window.utils.isEnterEvent(evt, function () {
-      if (typesAllowEnter.indexOf(evt.target.type) === -1) {
+      if (formElement.type === 'checkbox') {
+        formElement.checked = !formElement.checked;
+        evt.preventDefault();
+      } else if (typesAllowEnter.indexOf(formElement.type) === -1) {
         evt.preventDefault();
       }
     });
