@@ -461,6 +461,12 @@ input[type=checkbox]:focus + label
     vertical-align: middle;
 }
 
+.popup__pictures li img
+{
+  height: 40px;
+  margin-right: 5px;
+}
+
 .popup__avatar
 {
     position: absolute;

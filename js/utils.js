@@ -29,15 +29,15 @@
    * @param {string} selector Селектор для потомков (не обязательно)
    */
   function cleanNode(parent, selector) {
-    var children = [];
+    var nodeChildren = [];
     if (selector) {
-      children = parent.querySelectorAll(selector);
+      nodeChildren = parent.querySelectorAll(selector);
     } else {
-      children = parent.children;
+      nodeChildren = parent.children;
     }
 
-    for (var i = children.length - 1; i >= 0; i--) {
-      parent.removeChild(children[i]);
+    for (var i = nodeChildren.length - 1; i >= 0; i--) {
+      parent.removeChild(nodeChildren[i]);
     }
   }
 
@@ -59,10 +59,29 @@
     }
   }
 
+  /**
+   * Синхронизирует значения селектов.
+   * Второму селекту ставит такое же значение, как в первом.
+   *
+   * @param {Node} select1 Первый селект.
+   * @param {Node} select2 Второй селект.
+   */
+  function syncFields(select1, select2) {
+    var value1 = select1.value;
+    var options = select2.options;
+
+    for (var i = 0; i < options.length; i++) {
+      if (options[i].value === value1) {
+        select2.selectedIndex = i;
+      }
+    }
+  }
+
   window.utils = {
     cleanNode: cleanNode,
     isEscEvent: isEscEvent,
     isEnterEvent: isEnterEvent,
-    getFileUrl: getFileUrl
+    getFileUrl: getFileUrl,
+    syncFields: syncFields
   };
 })();

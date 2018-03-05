@@ -22,11 +22,11 @@
     pinElement.style.left = (pinData.location.x) + 'px';
     pinElement.style.top = (pinData.location.y - PIN_HEIGHT / 2) + 'px';
 
-    pinElement.querySelector('img').setAttribute('src', pinData.author.avatar);
+    pinElement.querySelector('img').src = pinData.author.avatar;
 
     pinElement.addEventListener('click', function () {
       if (!pinElement.classList.contains('map__pin--selected')) {
-        pinClickHandler(pinElement, pinData);
+        onPinClick(pinElement, pinData);
       }
     });
 
@@ -39,7 +39,7 @@
    * @param {Node} selectedPinElement Метка.
    * @param {object} selectedPinData Данные метки.
    */
-  function pinClickHandler(selectedPinElement, selectedPinData) {
+  function onPinClick(selectedPinElement, selectedPinData) {
     // Переключает класс
     toggleSelectedPin(selectedPinElement);
 
@@ -56,9 +56,9 @@
   function toggleSelectedPin(selectedPin) {
     var pins = selectedPin.parentNode.querySelectorAll('.map__pin');
 
-    for (var i = 0; i < pins.length; i++) {
-      pins[i].classList.remove('map__pin--selected');
-    }
+    pins.forEach(function (pin) {
+      pin.classList.remove('map__pin--selected');
+    });
 
     selectedPin.classList.add('map__pin--selected');
   }

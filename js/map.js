@@ -14,45 +14,20 @@
   var MAP_FILTERS_ELEMENT = MAP_ELEMENT.querySelector('.map__filters-container');
   var MAP_FILTERS = MAP_FILTERS_ELEMENT.querySelector('.map__filters');
 
+  var MAIN_PIN_WIDTH = parseInt(getComputedStyle(MAP_MAIN_PIN).width, 10);
   var MAIN_PIN_CORRECTION = 48;
   var PINS_NUM = 5; // ТЗ 4.6
 
   var hotels = [];
-  var filters = {
-    'housing': {
-      'type': MAP_FILTERS.querySelector('#housing-type').value,
-      'price': MAP_FILTERS.querySelector('#housing-price').value,
-      'rooms': MAP_FILTERS.querySelector('#housing-rooms').value,
-      'guests': MAP_FILTERS.querySelector('#housing-guests').value
-    },
-    'features': {
-      'wifi': MAP_FILTERS.querySelector('#filter-wifi').checked,
-      'dishwasher': MAP_FILTERS.querySelector('#filter-dishwasher').checked,
-      'parking': MAP_FILTERS.querySelector('#filter-parking').checked,
-      'washer': MAP_FILTERS.querySelector('#filter-washer').checked,
-      'elevator': MAP_FILTERS.querySelector('#filter-elevator').checked,
-      'conditioner': MAP_FILTERS.querySelector('#filter-conditioner').checked
-    }
-  };
 
   // Нажатие на enter на главной метке
   MAP_MAIN_PIN.addEventListener('keydown', function (evt) {
-    window.utils.isEnterEvent(evt, function () {
-      if (MAP_ELEMENT.classList.contains('map--faded')) {
-        activateMap();
-      }
-    });
+    window.utils.isEnterEvent(evt, activateMap);
   });
 
   // Перетаскивание главной метки
   MAP_MAIN_PIN.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
-
-    // Первое перемещение метки переводит страницу в активное состояние
-    var isActive = !(MAP_ELEMENT.classList.contains('map--faded'));
-    if (!isActive) {
-      activateMap();
-    }
 
     var startCoords = {
       x: evt.clientX,
@@ -64,14 +39,17 @@
      * @enum {number}
      */
     var limitCoords = {
-      MIN_X: 0,
-      MAX_X: MAP_ELEMENT.offsetWidth,
+      MIN_X: MAIN_PIN_WIDTH / 2,
+      MAX_X: MAP_ELEMENT.offsetWidth - MAIN_PIN_WIDTH / 2,
       MIN_Y: 150 - MAIN_PIN_CORRECTION, // Линия горизонта (ТЗ 3.4)
-      MAX_Y: MAP_FILTERS_ELEMENT.offsetTop - MAIN_PIN_CORRECTION // Ограничение по ТЗ 3.4
+      MAX_Y: 500 - MAIN_PIN_CORRECTION // Ограничение по ТЗ 3.4
     };
 
-    var onMouseMove = function (moveEvt) {
+    function onMouseMove(moveEvt) {
       moveEvt.preventDefault();
+
+      // Первое перемещение метки переводит страницу в активное состояние
+      activateMap();
 
       var shift = {
         x: startCoords.x - moveEvt.clientX,
@@ -89,29 +67,26 @@
       MAP_MAIN_PIN.style.left = pinX + 'px';
       MAP_MAIN_PIN.style.top = pinY + 'px';
 
-      window.form.updateAddress(isActive);
+      window.form.updateAddress(true);
       window.debounce(renderPins);
-    };
+    }
 
-    var onMouseUp = function (upEvt) {
+    function onMouseUp(upEvt) {
       upEvt.preventDefault();
+
+      // Если перемещения не было, страница активируется при отпускании мыши
+      activateMap();
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
-    };
+    }
 
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
   });
 
   // Изменение фильтров
-  MAP_FILTERS.addEventListener('change', function (evt) {
-    if (evt.target.name === 'features') {
-      filters.features[evt.target.value] = evt.target.checked;
-    } else {
-      var key = evt.target.name.split('-')[1];
-      filters.housing[key] = evt.target.value;
-    }
+  MAP_FILTERS.addEventListener('change', function () {
     window.debounce(renderPins);
   });
 
@@ -120,27 +95,29 @@
     window.utils.isEnterEvent(evt, function () {
       if (evt.target.name === 'features') {
         evt.target.checked = !evt.target.checked;
-        filters.features[evt.target.value] = evt.target.checked;
         window.debounce(renderPins);
       }
     });
   });
 
   /**
+   * Проверяет состояние карты
    * Переводит карту в активное состояние
    *
    */
   function activateMap() {
-    MAP_ELEMENT.classList.remove('map--faded');
-    window.form.activateForm();
+    if (MAP_ELEMENT.classList.contains('map--faded')) {
+      MAP_ELEMENT.classList.remove('map--faded');
+      window.form.activate();
 
-    window.backend.load(function (response) {
-      hotels = response;
-      renderPins();
-      activateFilters();
-    }, function (errorMessage) {
-      window.message(errorMessage);
-    });
+      window.backend.load(function (response) {
+        hotels = response;
+        renderPins();
+        activateFilters();
+      }, function (errorMessage) {
+        window.message(errorMessage);
+      });
+    }
   }
 
   /**
@@ -171,9 +148,9 @@
    *
    */
   function activateFilters() {
-    for (var i = 0; i < MAP_FILTERS.children.length; i++) {
-      MAP_FILTERS.children[i].disabled = false;
-    }
+    [].forEach.call(MAP_FILTERS.children, function (filter) {
+      filter.disabled = false;
+    });
   }
 
   /**
@@ -181,9 +158,9 @@
    *
    */
   function deactivateFilters() {
-    for (var i = 0; i < MAP_FILTERS.children.length; i++) {
-      MAP_FILTERS.children[i].disabled = true;
-    }
+    [].forEach.call(MAP_FILTERS.children, function (filter) {
+      filter.disabled = true;
+    });
   }
 
   /**
@@ -193,11 +170,13 @@
   function renderPins() {
     cleanMap(); // ТЗ 4.9
 
-    var filteredHotels = hotels.slice()
-        .filter(checkFilters)
-        .sort(function (left, right) {
-          return calculateDistance(left) - calculateDistance(right);
-        });
+    // Фильтруем объявления
+    var filteredHotels = window.filter(hotels.slice());
+
+    // Сортируем по расстоянию
+    filteredHotels.sort(function (left, right) {
+      return calculateDistance(left) - calculateDistance(right);
+    });
 
     var fragment = document.createDocumentFragment();
 
@@ -208,30 +187,6 @@
     }
 
     MAP_PINS_ELEMENT.appendChild(fragment);
-  }
-
-  function checkFilters(hotel) {
-    // Проверяем основные параметры жилья
-    for (var prop in filters.housing) {
-      if (filters.housing.hasOwnProperty(prop)) {
-        var hotelPropValue = hotel.offer[prop];
-        if (prop === 'price') {
-          hotelPropValue = getPriceCategory(hotelPropValue);
-        }
-        if ((filters.housing[prop] !== 'any') && (hotelPropValue.toString() !== filters.housing[prop])) {
-          return false;
-        }
-      }
-    }
-    // Проверяем удобства
-    for (var feat in filters.features) {
-      if (filters.features.hasOwnProperty(feat)) {
-        if (filters.features[feat] === true && hotel.offer.features.indexOf(feat) === -1) {
-          return false;
-        }
-      }
-    }
-    return true;
   }
 
   /**
@@ -262,18 +217,8 @@
     return {x: locationX, y: locationY};
   }
 
-  function getPriceCategory(price) {
-    if (price < 10000) {
-      return 'low';
-    } else if (price >= 50000) {
-      return 'high';
-    } else {
-      return 'middle';
-    }
-  }
-
   window.map = {
-    deactivateMap: deactivateMap,
+    deactivate: deactivateMap,
     getMainPinLocation: getMainPinLocation
   };
 })();
