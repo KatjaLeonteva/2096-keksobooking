@@ -8,7 +8,7 @@
   var FILTER_PRICE = MAP_FILTERS.querySelector('#housing-price');
   var FILTER_ROOMS = MAP_FILTERS.querySelector('#housing-rooms');
   var FILTER_GUESTS = MAP_FILTERS.querySelector('#housing-guests');
-  var FILTER_FEATURES = MAP_FILTERS.querySelector('#housing-features').querySelectorAll('input[type=checkbox]');
+  var FILTER_FEATURES = MAP_FILTERS.querySelector('#housing-features');
 
   var PRICE_LOW = 10000;
   var PRICE_HIGH = 50000;
@@ -30,8 +30,13 @@
   }
 
   function filterFeatures(hotel) {
+    var checkedFeatures = [].map.call(FILTER_FEATURES.querySelectorAll('input[name=features]:checked'), function(input) {
+      return input.value;
+    });
 
-    return true;
+    return checkedFeatures.every(function (feature) {
+      return hotel.offer.features.indexOf(feature) > -1;
+    });
   }
 
   function getPriceCategory(price) {

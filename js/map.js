@@ -90,13 +90,18 @@
   });
 
   // Изменение фильтров
-  MAP_FILTERS.addEventListener('change', function (evt) {
+  MAP_FILTERS.addEventListener('change', function () {
     window.debounce(renderPins);
   });
 
   // Изменение фильтров по нажатию на enter
-  MAP_FILTERS.addEventListener('keydown', function () {
-    window.debounce(renderPins);
+  MAP_FILTERS.addEventListener('keydown', function (evt) {
+    window.utils.isEnterEvent(evt, function () {
+      if (evt.target.name === 'features') {
+        evt.target.checked = !evt.target.checked;
+        window.debounce(renderPins);
+      }
+    });
   });
 
   /**
