@@ -22,22 +22,12 @@
 
   // Нажатие на enter на главной метке
   MAP_MAIN_PIN.addEventListener('keydown', function (evt) {
-    window.utils.isEnterEvent(evt, function () {
-      if (MAP_ELEMENT.classList.contains('map--faded')) {
-        activateMap();
-      }
-    });
+    window.utils.isEnterEvent(evt, activateMap);
   });
 
   // Перетаскивание главной метки
   MAP_MAIN_PIN.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
-
-    // Первое перемещение метки переводит страницу в активное состояние
-    var isActive = !(MAP_ELEMENT.classList.contains('map--faded'));
-    if (!isActive) {
-      activateMap();
-    }
 
     var startCoords = {
       x: evt.clientX,
@@ -52,11 +42,14 @@
       MIN_X: MAIN_PIN_WIDTH / 2,
       MAX_X: MAP_ELEMENT.offsetWidth - MAIN_PIN_WIDTH / 2,
       MIN_Y: 150 - MAIN_PIN_CORRECTION, // Линия горизонта (ТЗ 3.4)
-      MAX_Y: MAP_FILTERS_ELEMENT.offsetTop - MAIN_PIN_CORRECTION // Ограничение по ТЗ 3.4
+      MAX_Y: 500 - MAIN_PIN_CORRECTION // Ограничение по ТЗ 3.4
     };
 
     function onMouseMove(moveEvt) {
       moveEvt.preventDefault();
+
+      // Первое перемещение метки переводит страницу в активное состояние
+      activateMap();
 
       var shift = {
         x: startCoords.x - moveEvt.clientX,
@@ -74,12 +67,15 @@
       MAP_MAIN_PIN.style.left = pinX + 'px';
       MAP_MAIN_PIN.style.top = pinY + 'px';
 
-      window.form.updateAddress(isActive);
+      window.form.updateAddress(true);
       window.debounce(renderPins);
     }
 
     function onMouseUp(upEvt) {
       upEvt.preventDefault();
+
+      // Если перемещения не было, страница активируется при отпускании мыши
+      activateMap();
 
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
@@ -105,20 +101,23 @@
   });
 
   /**
+   * Проверяет состояние карты
    * Переводит карту в активное состояние
    *
    */
   function activateMap() {
-    MAP_ELEMENT.classList.remove('map--faded');
-    window.form.activate();
+    if (MAP_ELEMENT.classList.contains('map--faded')) {
+      MAP_ELEMENT.classList.remove('map--faded');
+      window.form.activate();
 
-    window.backend.load(function (response) {
-      hotels = response;
-      renderPins();
-      activateFilters();
-    }, function (errorMessage) {
-      window.message(errorMessage);
-    });
+      window.backend.load(function (response) {
+        hotels = response;
+        renderPins();
+        activateFilters();
+      }, function (errorMessage) {
+        window.message(errorMessage);
+      });
+    }
   }
 
   /**
