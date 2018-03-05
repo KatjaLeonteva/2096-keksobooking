@@ -30,10 +30,12 @@
   }
 
   function filterFeatures(hotel) {
-    var checkedFeatures = [].map.call(FILTER_FEATURES.querySelectorAll('input[name=features]:checked'), function(input) {
-      return input.value;
+    // Получаем массив отмеченных удобств
+    var checkedFeatures = [].map.call(FILTER_FEATURES.querySelectorAll('input[name=features]:checked'), function (checkbox) {
+      return checkbox.value;
     });
 
+    // Проверяем, все ли отмеченные удобства есть в данном отеле
     return checkedFeatures.every(function (feature) {
       return hotel.offer.features.indexOf(feature) > -1;
     });
@@ -50,7 +52,11 @@
   }
 
   function filterHotels(hotels) {
-    return hotels.filter(filterType).filter(filterPrice).filter(filterRooms).filter(filterGuests).filter(filterFeatures);
+    return hotels.filter(filterType)
+        .filter(filterPrice)
+        .filter(filterRooms)
+        .filter(filterGuests)
+        .filter(filterFeatures);
   }
 
   window.filter = filterHotels;
