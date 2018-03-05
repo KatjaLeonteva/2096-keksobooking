@@ -14,30 +14,11 @@
   var MAP_FILTERS_ELEMENT = MAP_ELEMENT.querySelector('.map__filters-container');
   var MAP_FILTERS = MAP_FILTERS_ELEMENT.querySelector('.map__filters');
 
-  var PRICE_LOW = 10000;
-  var PRICE_HIGH = 50000;
-
   var MAIN_PIN_WIDTH = parseInt(getComputedStyle(MAP_MAIN_PIN).width, 10);
   var MAIN_PIN_CORRECTION = 48;
   var PINS_NUM = 5; // ТЗ 4.6
 
   var hotels = [];
-  var filters = {
-    'housing': {
-      'type': MAP_FILTERS.querySelector('#housing-type').value,
-      'price': MAP_FILTERS.querySelector('#housing-price').value,
-      'rooms': MAP_FILTERS.querySelector('#housing-rooms').value,
-      'guests': MAP_FILTERS.querySelector('#housing-guests').value
-    },
-    'features': {
-      'wifi': MAP_FILTERS.querySelector('#filter-wifi').checked,
-      'dishwasher': MAP_FILTERS.querySelector('#filter-dishwasher').checked,
-      'parking': MAP_FILTERS.querySelector('#filter-parking').checked,
-      'washer': MAP_FILTERS.querySelector('#filter-washer').checked,
-      'elevator': MAP_FILTERS.querySelector('#filter-elevator').checked,
-      'conditioner': MAP_FILTERS.querySelector('#filter-conditioner').checked
-    }
-  };
 
   // Нажатие на enter на главной метке
   MAP_MAIN_PIN.addEventListener('keydown', function (evt) {
@@ -110,24 +91,12 @@
 
   // Изменение фильтров
   MAP_FILTERS.addEventListener('change', function (evt) {
-    if (evt.target.name === 'features') {
-      filters.features[evt.target.value] = evt.target.checked;
-    } else {
-      var key = evt.target.name.split('-')[1];
-      filters.housing[key] = evt.target.value;
-    }
     window.debounce(renderPins);
   });
 
   // Изменение фильтров по нажатию на enter
-  MAP_FILTERS.addEventListener('keydown', function (evt) {
-    window.utils.isEnterEvent(evt, function () {
-      if (evt.target.name === 'features') {
-        evt.target.checked = !evt.target.checked;
-        filters.features[evt.target.value] = evt.target.checked;
-        window.debounce(renderPins);
-      }
-    });
+  MAP_FILTERS.addEventListener('keydown', function () {
+    window.debounce(renderPins);
   });
 
   /**
@@ -197,11 +166,13 @@
   function renderPins() {
     cleanMap(); // ТЗ 4.9
 
-    var filteredHotels = hotels.slice()
-        .filter(checkFilters)
-        .sort(function (left, right) {
-          return calculateDistance(left) - calculateDistance(right);
-        });
+    // Фильтруем объявления
+    var filteredHotels = window.filter(hotels.slice());
+
+    // Сортируем по расстоянию
+    filteredHotels.sort(function (left, right) {
+      return calculateDistance(left) - calculateDistance(right);
+    });
 
     var fragment = document.createDocumentFragment();
 
@@ -212,30 +183,6 @@
     }
 
     MAP_PINS_ELEMENT.appendChild(fragment);
-  }
-
-  function checkFilters(hotel) {
-    // Проверяем основные параметры жилья
-    for (var prop in filters.housing) {
-      if (filters.housing.hasOwnProperty(prop)) {
-        var hotelPropValue = hotel.offer[prop];
-        if (prop === 'price') {
-          hotelPropValue = getPriceCategory(hotelPropValue);
-        }
-        if ((filters.housing[prop] !== 'any') && (hotelPropValue.toString() !== filters.housing[prop])) {
-          return false;
-        }
-      }
-    }
-    // Проверяем удобства
-    for (var feat in filters.features) {
-      if (filters.features.hasOwnProperty(feat)) {
-        if (filters.features[feat] && hotel.offer.features.indexOf(feat) === -1) {
-          return false;
-        }
-      }
-    }
-    return true;
   }
 
   /**
@@ -264,16 +211,6 @@
     var locationY = MAP_MAIN_PIN.offsetTop + pinCorrection;
 
     return {x: locationX, y: locationY};
-  }
-
-  function getPriceCategory(price) {
-    if (price < PRICE_LOW) {
-      return 'low';
-    } else if (price >= PRICE_HIGH) {
-      return 'high';
-    } else {
-      return 'middle';
-    }
   }
 
   window.map = {
