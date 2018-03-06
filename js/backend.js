@@ -9,7 +9,7 @@
   var TIMEOUT = 10000; // 10s
   var STATUS_CODE_OK = 200;
 
-  var load = function (onLoad, onError) {
+  function load(onLoad, onError) {
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
     xhr.timeout = TIMEOUT;
@@ -31,12 +31,12 @@
 
     xhr.open('GET', 'https://js.dump.academy/keksobooking/data');
     xhr.send();
-  };
+  }
 
-  var save = function (data, onLoad, onError) {
+  function save(data, onLoad, onError) {
     var xhr = new XMLHttpRequest();
     xhr.responseType = 'json';
-    xhr.timeout = TIMEOUT; // 10s
+    xhr.timeout = TIMEOUT;
 
 
     xhr.addEventListener('load', function () {
@@ -56,7 +56,7 @@
 
     xhr.open('POST', 'https://js.dump.academy/keksobooking');
     xhr.send(data);
-  };
+  }
 
   window.backend = {
     load: load,

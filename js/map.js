@@ -26,7 +26,7 @@
     minX: MAIN_PIN_WIDTH / 2,
     maxX: MAP_ELEMENT.offsetWidth - MAIN_PIN_WIDTH / 2,
     minY: 150 - MAIN_PIN_CORRECTION, // Линия горизонта (ТЗ 3.4)
-    maxY: 500 - MAIN_PIN_CORRECTION // Ограничение по ТЗ 3.4
+    maxY: MAP_FILTERS_ELEMENT.offsetTop - MAIN_PIN_CORRECTION
   };
 
   var hotels = [];
