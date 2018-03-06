@@ -18,6 +18,17 @@
   var MAIN_PIN_CORRECTION = 48;
   var PINS_NUM = 5; // ТЗ 4.6
 
+  /**
+   * Координаты, ограничивающие перемещение маркера
+   * @enum {number}
+   */
+  var LIMIT_COORDS = {
+    minX: MAIN_PIN_WIDTH / 2,
+    maxX: MAP_ELEMENT.offsetWidth - MAIN_PIN_WIDTH / 2,
+    minY: 150 - MAIN_PIN_CORRECTION, // Линия горизонта (ТЗ 3.4)
+    maxY: 500 - MAIN_PIN_CORRECTION // Ограничение по ТЗ 3.4
+  };
+
   var hotels = [];
 
   // Нажатие на enter на главной метке
@@ -34,17 +45,6 @@
     var startCoords = {
       x: evt.clientX,
       y: evt.clientY
-    };
-
-    /**
-     * Координаты, ограничивающие перемещение маркера
-     * @enum {number}
-     */
-    var limitCoords = {
-      MIN_X: MAIN_PIN_WIDTH / 2,
-      MAX_X: MAP_ELEMENT.offsetWidth - MAIN_PIN_WIDTH / 2,
-      MIN_Y: 150 - MAIN_PIN_CORRECTION, // Линия горизонта (ТЗ 3.4)
-      MAX_Y: 500 - MAIN_PIN_CORRECTION // Ограничение по ТЗ 3.4
     };
 
     function onMouseMove(moveEvt) {
@@ -64,8 +64,8 @@
         y: moveEvt.clientY
       };
 
-      var pinX = Math.min(Math.max((MAP_MAIN_PIN.offsetLeft - shift.x), limitCoords.MIN_X), limitCoords.MAX_X);
-      var pinY = Math.min(Math.max((MAP_MAIN_PIN.offsetTop - shift.y), limitCoords.MIN_Y), limitCoords.MAX_Y);
+      var pinX = Math.min(Math.max((MAP_MAIN_PIN.offsetLeft - shift.x), LIMIT_COORDS.minX), LIMIT_COORDS.maxX);
+      var pinY = Math.min(Math.max((MAP_MAIN_PIN.offsetTop - shift.y), LIMIT_COORDS.minY), LIMIT_COORDS.maxY);
 
       MAP_MAIN_PIN.style.left = pinX + 'px';
       MAP_MAIN_PIN.style.top = pinY + 'px';
