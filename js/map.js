@@ -29,6 +29,8 @@
   MAP_MAIN_PIN.addEventListener('mousedown', function (evt) {
     evt.preventDefault();
 
+    var dragged = false;
+
     var startCoords = {
       x: evt.clientX,
       y: evt.clientY
@@ -49,6 +51,7 @@
       moveEvt.preventDefault();
 
       // Первое перемещение метки переводит страницу в активное состояние
+      dragged = true;
       activateMap();
 
       var shift = {
@@ -74,11 +77,13 @@
     function onMouseUp(upEvt) {
       upEvt.preventDefault();
 
-      // Если перемещения не было, страница активируется при отпускании мыши
-      activateMap();
-
       document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseup', onMouseUp);
+
+      // Если перемещения не было, страница активируется при отпускании мыши
+      if (!dragged) {
+        activateMap();
+      }
     }
 
     document.addEventListener('mousemove', onMouseMove);
